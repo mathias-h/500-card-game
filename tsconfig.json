@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "forceConsistentCasingInFileNames": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "outDir": "dest",
+        "sourceMap": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "target": "es2017",
+        "lib": [
+            "dom",
+            "es2017"
+        ],
+        "types": [
+            "node_modules/@types"
+        ]
+    }
+}
