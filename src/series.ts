@@ -1,16 +1,25 @@
 import { SortedArray } from "./sorted-array"
 import { Player } from "./player";
-import { Card, values } from "./card";
+import { Card } from "./card";
 
 export class Series {
     series: { player: Player, cards: SortedArray<Card> }[] = []
 
     validateSeries(cards: SortedArray<Card>) {
         const ca = new Array(...cards.array)
+        const lastCard = ca[ca.length-1]
+        const aceIsFirstCard = ca[0].value == "two" && lastCard.value == "ace"
+
+        if (aceIsFirstCard) {
+            ca.unshift(ca.pop() as any)
+        }
+
         let previousCard = ca[0]
 
         for (let i = 1; i < ca.length; i++) {
             if (!ca[i].isValidAfter(previousCard)) return false
+
+            previousCard = ca[i]
         }
 
         return true
@@ -31,7 +40,7 @@ export class Series {
 
     }
 
-    score(player) {
+    // score(player) {
 
-    }
+    // }
 }

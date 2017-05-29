@@ -50,22 +50,26 @@ describe("Series", () => {
     describe("validate", () => {
         it("should handle wrong suit", () => {
             const cards = new SortedArray<Card>([two,three,fourOfOtherSuit], Card.compare)
-            expect(() => series.validateSeries(cards)).to.throw()
+            expect(series.validateSeries(cards)).to.be.false
         })
         it("should ensure order", () => {
             const cards = new SortedArray<Card>([two,three,five], Card.compare)
-            expect(() => series.validateSeries(cards)).to.throw()
+            expect(series.validateSeries(cards)).to.be.false
         })
         it("should handle joker", () => {
             const cards = new SortedArray<Card>([two,three,joker], Card.compare)
-            expect(() => series.validateSeries(cards)).not.to.throw()
+            expect(series.validateSeries(cards)).not.to.be.false
 
             const cards1 = new SortedArray<Card>([joker,three,four], Card.compare)
-            expect(() => series.validateSeries(cards1)).not.to.throw()
+            expect(series.validateSeries(cards1)).not.to.be.false
         })
-        it("should hanlde ace first", () => {
+        it("should handle ace first", () => {
             const cards = new SortedArray<Card>([ace,two,three], Card.compare)
-            expect(() => series.validateSeries(cards)).not.to.throw()
+            expect(series.validateSeries(cards)).not.to.be.false
+        })
+        it("should handle ace last", () => {
+            const cards = new SortedArray<Card>([two,three,four,five,six,seven,eight,nine,ten,jack,queen,king,ace], Card.compare)
+            expect(series.validateSeries(cards)).not.to.be.false
         })
     })
 })

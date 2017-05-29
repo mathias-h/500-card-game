@@ -43,11 +43,19 @@ export class Card {
     }
 
     isValidAfter(c: Card) {
-        return this.suit == c.suit && values.indexOf(this.value as any) - values.indexOf(c.value as any) == 1
+        if (this.suit == "joker" || c.suit == "joker") return true
+
+        return this.suit == c.suit && 
+            ((c.value == "ace" && this.value == "two") ||
+            values.indexOf(this.value as any) - values.indexOf(c.value as any) == 1)
     }
 
     isValidBefore(c: Card) {
-        return this.suit == c.suit && values.indexOf(this.value as any) - values.indexOf(c.value as any) == -1
+        if (this.suit == "joker" || c.suit == "joker") return true
+        
+        return this.suit == c.suit && 
+            ((this.value == "ace" && c.value == "two") ||
+            values.indexOf(this.value as any) - values.indexOf(c.value as any) == -1)
     }
 
     compareTo(c: Card) {
