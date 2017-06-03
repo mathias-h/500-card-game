@@ -1,9 +1,9 @@
 import * as http from "http"
 import * as express from "express"
-import { BoardSocket } from "./board-socket"
+import { SocketController } from "./socket-controller"
 import * as socket from "socket.io"
 
-const games: BoardSocket[] = []
+const games: SocketController[] = []
 
 const app = express()
 const httpServer = http.createServer(app)
@@ -11,7 +11,7 @@ const io = socket(httpServer)
 
 io.on("connection", (socket: SocketIO.Socket) => {
     socket.on("create-game", (callback: Function) => {
-        const board = new BoardSocket()
+        const board = new SocketController()
 
         games.push(board)
 
