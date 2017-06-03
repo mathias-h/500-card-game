@@ -1,8 +1,9 @@
 import { expect } from "chai";
-import { SortedArray } from "../src/sorted-array"
-import { Card, suits } from "../src/card";
+import { Card, Joker, suits } from "../common/card";
 import { Series } from "../src/series";
 import { Player, AppendType } from "../src/player";
+
+const createPlayer = (id: number) => new Player(id, null as any, () => {}, () => {}, () => {}, () => {}, () => {}, () => {})
 
 describe("Series", () => {
     const two = new Card(suits[0], "two")
@@ -19,118 +20,196 @@ describe("Series", () => {
     const queen = new Card(suits[0], "queen")
     const king = new Card(suits[0], "king")
     const ace = new Card(suits[0], "ace")
-    const joker = new Card("joker")
+    let joker: Joker
     let player: Player
     let series: Series
 
     beforeEach(() => {
-        player = new Player(1, null as any)
+        joker =  new Joker()
+        player = createPlayer(1)
         series = new Series()
+    })
+
+    describe("insertSeries", () => {
+        it("should handle simple case", () => {
+            series["insertSeries"](player, [three, four, two])
+
+            expect(series.series[0].player).to.eq(player)
+            expect(series.series[0].cards).to.deep.eq([two,three,four])
+        })
+    })
+
+    describe("sortCards", () => {
+        it("should handle simple case", () => {
+            const cards = Series.sortCards([two, four, three])
+
+            expect(cards[0]).to.eq(two)
+            expect(cards[1]).to.eq(three)
+            expect(cards[2]).to.eq(four)
+        })
+
+        it("should handle ace first", () => {
+            const cards = Series.sortCards([ace, two, three])
+
+            expect(cards[0]).to.eq(ace)
+            expect(cards[1]).to.eq(two)
+            expect(cards[2]).to.eq(three)
+        })
+        // joker
+        it("should handle ace last", () => {
+            const cards = Series.sortCards([two, three, four, five, six, seven, eight, nine, ten, jack, queen, king, ace])
+
+            expect(cards[0]).to.eq(two)
+            expect(cards[12]).to.eq(ace)
+        })
+
+        it("should handle simple joker case", () => {
+            const cards = Series.sortCards([two, joker, four])
+
+            expect(cards[0]).to.eq(two)
+            expect(cards[1]).to.eq(joker)
+            expect(joker.represents.value).to.eq(three.value)
+            expect(cards[2]).to.eq(four)
+        })
+        it("should handle first joker", () => {
+            const cards = Series.sortCards([joker, three, four, five, six, seven, eight, nine, ten, jack, queen, king, ace])
+
+            expect(cards[0]).to.eq(joker)
+            expect((cards[0] as Joker).represents.value).to.eq(two.value)
+
+            expect(cards[1]).to.eq(three)
+        })
+
+        it("should handle last joker", () => {
+            const cards = Series.sortCards([two, joker])
+
+            expect(cards[0]).to.eq(two)
+
+            expect(cards[1]).to.eq(joker)
+            expect((cards[1] as Joker).represents.value).to.eq(three.value)
+        })
+
+        it("should handle invalid cards", () => {
+            expect(() => Series.sortCards([two, four])).to.throw()
+        })
     })
 
     describe("place", () => {
         it("should place", () => {
-            const cards = new SortedArray<Card>([two,three,four], Card.compare)
-
             expect(series.series.length).to.eq(0)
 
-            series.place(cards, player)
+            series.place([two,three,four], player)
 
             expect(series.series.length).to.eq(1)
-            expect(series.series[0].cards.array.length).to.eq(3)
-            expect(series.series[0].cards.array).to.deep.eq([two,three,four])
+            expect(series.series[0].cards.length).to.eq(3)
+            expect(series.series[0].cards).to.deep.eq([two,three,four])
             expect(series.series[0].player).to.eq(player)
         })
         it("should handle to few cards", () => {
-            const cards = new SortedArray<Card>([two,three], Card.compare)
-            expect(() => series.place(cards, player)).to.throw()
+            expect(() => series.place([two,three], player)).to.throw()
         })
         it("should handle invalid cards", () => {
-            const cards = new SortedArray<Card>([two, four, five], Card.compare)
-
-            expect(() => series.place(cards, player)).to.throw()
+            expect(() => series.place([two, four, five], player)).to.throw()
         })
     })
 
     describe("validate", () => {
         it("should handle no cards", () => {
-            const cards = new SortedArray<Card>([], Card.compare)
-            expect(Series.validateSeries(cards)).to.be.true
+            expect(Series.validateSeries([])).to.be.true
         })
         it("should handle wrong suit", () => {
-            const cards = new SortedArray<Card>([two,three,fourOfOtherSuit], Card.compare)
-            expect(Series.validateSeries(cards)).to.be.false
+            expect(() => Series.validateSeries([two,three,fourOfOtherSuit])).to.throw()
         })
         it("should ensure order", () => {
-            const cards = new SortedArray<Card>([two,three,five], Card.compare)
-            expect(Series.validateSeries(cards)).to.be.false
+            expect(() => Series.validateSeries([two,three,five])).to.throw()
         })
         it("should handle joker", () => {
-            const cards = new SortedArray<Card>([two,three,joker], Card.compare)
-            expect(Series.validateSeries(cards)).not.to.be.false
+            expect(Series.validateSeries([two,three,joker])).not.to.be.false
         })
         it("should handle ace first", () => {
-            const cards = new SortedArray<Card>([ace,two,three], Card.compare)
-            expect(Series.validateSeries(cards)).not.to.be.false
+            expect(Series.validateSeries([ace,two,three])).not.to.be.false
         })
         it("should handle ace last", () => {
-            const cards = new SortedArray<Card>([two,three,four,five,six,seven,eight,nine,ten,jack,queen,king,ace], Card.compare)
-            expect(Series.validateSeries(cards)).not.to.be.false
+            expect(Series.validateSeries([two,three,four,five,six,seven,eight,nine,ten,jack,queen,king,ace])).not.to.be.false
         })
     })
 
     describe("append", () => {
         it("should handle after", () => {
-            series.series = [{ player, cards: new SortedArray<Card>([two,three,four], Card.compare) }]
-            const cards = new SortedArray<Card>([five], Card.compare)
+            series["insertSeries"](player, [two,three,four])
+            series.append([five], player, AppendType.after)
 
-            series.append(cards, player, AppendType.after)
-
-            expect(series.series[1].cards.array[0]).to.deep.eq(five)
+            expect(series.series[1].cards[0]).to.deep.eq(five)
             expect(series.series[1].player).to.deep.eq(player)
         })
 
         it("should handle before", () => {
-            series.series = [{ player, cards: new SortedArray<Card>([three,four,five], Card.compare) }]
-            const cards = new SortedArray<Card>([two], Card.compare)
+            series["insertSeries"](player, [three,four,five])
 
-            series.append(cards, player, AppendType.before)
+            series.append([two], player, AppendType.before)
 
-            expect(series.series[0].cards.array[0]).to.deep.eq(two)
+            expect(series.series[0].cards[0]).to.deep.eq(two)
             expect(series.series[0].player).to.deep.eq(player)
             expect(series.series.length).to.eq(2)
+        })
+        it("should not allow wrong cards to be appended after", () => {
+            series["insertSeries"](player, [two,three,four])
+
+            expect(() => series.append([six], player, AppendType.after)).to.throw()
+        })
+        it("should not allow wrong cards to be appended before", () => {
+            series["insertSeries"](player, [four,five,six])
+
+            expect(() => series.append([two], player, AppendType.before)).to.throw()
         })
     })
 
     describe("score", () => {
         it("should handle number cards", () => {
-            series.series = [{ player, cards: new SortedArray<Card>([two], Card.compare) }]
+            series["insertSeries"](player, [two])
             expect(series.score(player)).to.eq(5)
 
-            series.series = [{ player, cards: new SortedArray<Card>([nine], Card.compare) }]
+            series.series = []
+            series["insertSeries"](player, [nine])
             expect(series.score(player)).to.eq(5)
         })
         it("should handle picturecards", () => {
-            series.series = [{ player, cards: new SortedArray<Card>([ten], Card.compare) }]
+            series["insertSeries"](player, [ten])
             expect(series.score(player)).to.eq(10)
 
-            series.series = [{ player, cards: new SortedArray<Card>([king], Card.compare) }]
+            series.series = []
+            series["insertSeries"](player, [king])
             expect(series.score(player)).to.eq(10)
         })
         it("should handle ace", () => {
-            series.series = [{ player, cards: new SortedArray<Card>([ace], Card.compare) }]
+            series["insertSeries"](player, [ace])
             expect(series.score(player)).to.eq(15)
         })
         it("should handle joker", () => {
-            series.series = [{ player, cards: new SortedArray<Card>([joker], Card.compare) }]
-            expect(series.score(player)).to.eq(25)
+            series["insertSeries"](player, [two, joker])
+            expect(series.score(player)).to.eq(30)
         })
         it("should handle player", () => {
-            series.series = [
-                { player, cards: new SortedArray<Card>([two], Card.compare) },
-                { player: new Player(2, null as any), cards: new SortedArray<Card>([two], Card.compare) }
-            ]
+            series["insertSeries"](player, [two])
+            series["insertSeries"](createPlayer(2), [two])
+
             expect(series.score(player)).to.eq(5)
+        })
+    })
+
+    describe("replace", () => {
+        it("should handle simple case", () => {
+            series["insertSeries"](player, [two, joker])
+
+            series.replace(1, three)
+
+            expect(series.series[0].cards[0]).to.eq(two)
+            expect(series.series[0].cards[1]).to.eq(three)
+        })
+        it("should handle wrong card", () => {
+            series["insertSeries"](player, [two, joker])
+
+            expect(() => series.replace(1, four)).to.throw()
         })
     })
 })
