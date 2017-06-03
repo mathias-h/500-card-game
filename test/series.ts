@@ -51,13 +51,12 @@ describe("Series", () => {
 
     describe("sortCards", () => {
         it("should handle simple case", () => {
-            const cards = Series.sortCards([two, four, three])
+            const cards = Series.sortCards([three, two, four])
 
             expect(cards[0]).to.eq(two)
             expect(cards[1]).to.eq(three)
             expect(cards[2]).to.eq(four)
         })
-
         it("should handle ace first", () => {
             const cards = Series.sortCards([ace, two, three])
 
@@ -65,14 +64,12 @@ describe("Series", () => {
             expect(cards[1]).to.eq(two)
             expect(cards[2]).to.eq(three)
         })
-        // joker
         it("should handle ace last", () => {
             const cards = Series.sortCards([two, three, four, five, six, seven, eight, nine, ten, jack, queen, king, ace])
 
             expect(cards[0]).to.eq(two)
             expect(cards[12]).to.eq(ace)
         })
-
         it("should handle simple joker case", () => {
             const cards = Series.sortCards([two, joker, four])
 
@@ -89,7 +86,6 @@ describe("Series", () => {
 
             expect(cards[1]).to.eq(three)
         })
-
         it("should handle last joker", () => {
             const cards = Series.sortCards([two, joker])
 
