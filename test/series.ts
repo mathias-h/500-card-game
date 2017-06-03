@@ -193,6 +193,22 @@ describe("Series", () => {
         })
     })
 
+    describe("replace", () => {
+        it("should handle simple case", () => {
+            series["insertSeries"](player, [two, joker])
+
+            series.replace(1, three)
+
+            expect(series.series[0].cards[0]).to.eq(two)
+            expect(series.series[0].cards[1]).to.eq(three)
+        })
+        it("should handle wrong card", () => {
+            series["insertSeries"](player, [two, joker])
+
+            expect(() => series.replace(1, four)).to.throw()
+        })
+    })
+
     describe("score", () => {
         it("should handle number cards", () => {
             series["insertSeries"](player, [two])
@@ -223,22 +239,6 @@ describe("Series", () => {
             series["insertSeries"](createPlayer(2), [two])
 
             expect(series.score(player)).to.eq(5)
-        })
-    })
-
-    describe("replace", () => {
-        it("should handle simple case", () => {
-            series["insertSeries"](player, [two, joker])
-
-            series.replace(1, three)
-
-            expect(series.series[0].cards[0]).to.eq(two)
-            expect(series.series[0].cards[1]).to.eq(three)
-        })
-        it("should handle wrong card", () => {
-            series["insertSeries"](player, [two, joker])
-
-            expect(() => series.replace(1, four)).to.throw()
         })
     })
 })
