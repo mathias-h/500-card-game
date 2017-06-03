@@ -160,11 +160,14 @@ describe("Series", () => {
 
     describe("append", () => {
         it("should handle after", () => {
-            series["insertSeries"](player, [two,three,four])
+            series["insertSeries"](player, threeCardsInOrder)
             series.append([five], player, AppendType.after)
 
-            expect(series.series[1].cards[0]).to.deep.eq(five)
-            expect(series.series[1].player).to.deep.eq(player)
+            expect(series.series.length).to.eq(2)
+            expect(series.series[0].cards).to.deep.eq(threeCardsInOrder)
+            expect(series.series[0].player).to.eq(player)
+            expect(series.series[1].cards[0]).to.eq(five)
+            expect(series.series[1].player).to.eq(player)
         })
 
         it("should handle before", () => {
@@ -172,12 +175,14 @@ describe("Series", () => {
 
             series.append([two], player, AppendType.before)
 
-            expect(series.series[0].cards[0]).to.deep.eq(two)
-            expect(series.series[0].player).to.deep.eq(player)
             expect(series.series.length).to.eq(2)
+            expect(series.series[0].cards[0]).to.eq(two)
+            expect(series.series[0].player).to.eq(player)
+            expect(series.series[1].cards).to.deep.eq([three,four,five])
+            expect(series.series[1].player).to.eq(player)
         })
         it("should not allow wrong cards to be appended after", () => {
-            series["insertSeries"](player, [two,three,four])
+            series["insertSeries"](player, threeCardsInOrder)
 
             expect(() => series.append([six], player, AppendType.after)).to.throw()
         })
