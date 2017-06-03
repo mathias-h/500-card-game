@@ -4,17 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -w dest/test/all.js"
+    "test": "mocha -w dest/test/all.js",
+    "start": "node dest/src/main.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^3.5.2",
+    "@types/express": "^4.0.35",
+    "@types/socket.io": "^1.4.29",
     "chai": "^3.5.0",
     "mocha": "^3.4.1"
   },
   "dependencies": {
-    "sorted-array": "^2.0.1"
+    "express": "^4.15.3",
+    "socket.io": "^2.0.1"
   }
 }
