@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            window.onload = () => {
+                const socket = io()
+                const createGameButton = document.querySelector(".create")
+                const joinGameButton = document.querySelector(".join")
+
+                createGameButton.addEventListener("click", _ => {
+                    socket.emit("create-game", ({id}) => {
+                        console.log(id)
+                        location.href = "/board.html?id=" + id
+                    })
+                })
+
+                joinGameButton.addEventListener("click", _ => {
+                    location.href = "/player.html"
+                })
+            }
+        </script>
+    </head>
+    <body>
+        <button class="create">create game</button>
+        <button class="join">join game</button>
+    </body>
+</html>
