@@ -16,9 +16,6 @@
         "lib": [
             "dom",
             "es2017"
-        ],
-        "types": [
-            "node_modules/@types"
         ]
     }
 }
