@@ -1,0 +1,111 @@
+<style>
+    hand-el {
+        display: flex;
+        position: fixed;
+        bottom: 20px;
+        overflow-x: auto;
+        width: 100%;
+        padding-top: 50px;
+        margin-left: var(--card-offset);
+    }
+    hand-el .cards {
+        --card-offset: 0;
+
+        display: flex;
+        margin-left: calc(50px + var(--card-offset))
+    }
+</style>
+<script>
+    class HandEl extends HTMLElement {
+        constructor() {
+            super()
+
+            this.addCard = this.addCard.bind(this)
+            this.removeCards = this.removeCards.bind(this)
+            this.selectCard = this.selectCard.bind(this)
+            this.deselectCard = this.deselectCard.bind(this)
+            this.setCardOffset = this.setCardOffset.bind(this)
+
+            window.addEventListener("resize", this.setCardOffset)
+        }
+
+        setCardOffset() {
+            const offset = Math.max(0, (55 + window.innerWidth - ((this.children.length-1) * 45))/2)
+
+            this.style.setProperty("--card-offset", offset + "px")
+        }
+
+        setSocket(socket) {
+            this.socket = socket
+
+            socket.on("card-added", this.addCard)
+            socket.on("cards-removed", this.removeCards)
+            socket.on("card-selected", this.selectCard)
+            socket.on("card-deselected", this.deselectCard)
+        }
+
+        addCard(card) {
+            card = new Card(card.suit, card.value)
+
+            const cardEl = new CardEl()
+            cardEl.card = card
+            cardEl.addEventListener("click", _ => {
+                this.socket.emit("toggle-card", card, ({ ok, error }) => {
+                    if (!ok) { throw error }
+                })
+            })
+
+            if (this.children.length == 0) {
+                this.appendChild(cardEl)
+            }
+            else {
+                const firstCard = this.children[0]
+
+                if (card.compareTo(firstCard.card) < 0) {
+                    this.insertBefore(cardEl, firstCard)
+                }
+
+                for (let i = 0; i < this.children.length; i++) {
+                    const c = this.children[i]
+
+                    if (card.compareTo(c.card) > 0) {
+                        this.insertBefore(cardEl, this.children[i+1])
+                    }
+                }
+            }
+
+            this.setCardOffset()
+        }
+        removeCards(cards) {
+            for (const card of cards) {
+                for (const cardEl of this.children) {
+                    if (cardEl.card.suit == card.suit && cardEl.card.value == card.value) {
+                        this.removeChild(cardEl)
+                        break
+                    }
+                }
+            }
+
+            this.setCardOffset()
+        }
+        selectCard(card) {
+            for (const cardEl of this.children) {
+                if (cardEl.card.suit == card.suit && cardEl.card.value == card.value) {
+                    cardEl.setAttribute("selected", "")
+                    break
+                }
+            }
+        }
+
+        deselectCard(card) {
+            for (const cardEl of this.children) {
+                if (cardEl.card.suit == card.suit && cardEl.card.value == card.value) {
+                    cardEl.removeAttribute("selected")
+                    break
+                }
+            }
+        }
+    }
+
+    customElements.define("hand-el", HandEl)
+</script>

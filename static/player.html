@@ -1,0 +1,73 @@
+<html>
+    <head>
+        <script src="/socket.io/socket.io.js"></script>
+        <link rel="import" href="card.html">
+        <link rel="import" href="hand-el.html">
+        <link rel="import" href="actions-el.html">
+        <link rel="import" href="options-el.html">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                --player-color: black;
+
+                margin: 0;
+                border-top: 3px solid var(--player-color)
+            }
+
+            #id-box input {
+                width: 100px;
+            }
+        </style>
+        <script>
+            window.onload = () =>
+                fetch("player-colors.json").then(res => res.json()).then(playerColors => {
+                    const CardEl = customElements.get("card-el")
+                    const idBox = document.getElementById("id-box")
+                    const input = idBox.querySelector("input")
+                    const handEl = document.querySelector("hand-el")
+                    const actionsEl = document.querySelector("actions-el")
+                    const optionsEl = document.querySelector("options-el")
+                    const socket = io()
+
+                    function joinGame() {
+                        if (!input.validity.valid) {
+                            confirm(input.validationMessage)
+                        }
+                        else {
+                            socket.emit("join-game", input.value, ({ ok, error, playerId }) => {
+                                if (ok) {
+                                    idBox.hidden = true
+                                    document.getElementById("player").hidden = false
+
+                                    handEl.setSocket(socket)
+                                    actionsEl.setSocket(socket, playerId)
+                                    optionsEl.setData(playerColors, playerId)
+
+                                    document.body.style.setProperty("--player-color", playerColors[playerId-1])
+                                }
+                                else {
+                                    confirm(error)
+                                }
+                            })
+                        }
+                    }
+
+                    idBox.querySelector(".join").addEventListener("click", joinGame)
+                    input.addEventListener("keydown", evt => {
+                        if (evt.key == "Enter") joinGame()
+                    })
+                })
+        </script>
+    </head>
+    <body>
+        <section id="id-box">
+            <input type="number" max="9999" min="0" required>
+            <button class="join">join</button>
+        </section>
+        <div id="player" hidden>
+            <actions-el></actions-el>
+            <options-el></options-el>
+            <hand-el></hand-el>
+        </div>
+    </body>
+</html>

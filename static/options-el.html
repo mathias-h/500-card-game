@@ -1,0 +1,129 @@
+<style>
+    options-el {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        overflow-x: auto;
+        padding: 0 20px;
+    }
+    options-el[hidden] {
+        display: none;
+    }
+
+    options-el .option {
+        display: flex;
+        margin-right: 70px;
+    }
+
+    options-el .option:last-child {
+        margin-right: 68px;
+    }
+
+    options-el .spacer {
+        min-width: 1px;
+        margin: 1px;
+    }
+</style>
+<script>
+    class OptionsEl extends HTMLElement {
+        connectedCallback() {
+            this.hidden = true
+        }
+
+        setData(playerColors, playerId) {
+            this.playerColors = playerColors
+            this.playerId = playerId
+        }
+
+        open() {
+            this.innerHTML = ""
+            this.hidden = false
+        }
+
+        close() {
+            this.hidden = true
+        }
+
+        setOptions(options, onClick) {
+            this.open()
+
+            for (const option of options) {
+                this.addOption(option, onClick)
+            }
+
+            const spacer = document.createElement("div")
+            spacer.className = "spacer"
+            this.appendChild(spacer)
+        }
+
+        addOption(option, onClick) {
+            const optionEl = document.createElement("div")
+            let selectedCard = document.querySelector("hand-el card-el[selected]")
+    
+            if (!selectedCard) {
+                alert("you must select at least one card to append")
+                return
+            }
+            else {
+                selectedCard = selectedCard.card
+            }
+
+            optionEl.addEventListener("click", _ => {
+                onClick(option)
+                this.close()
+            })
+
+            const ghostCard = new CardEl()
+            optionEl.classList.add("option")
+            optionEl.option = option.option
+
+            ghostCard.style.setProperty("--card-player-color", this.playerColors[this.playerId-1])
+            ghostCard.setAttribute("ghost", "")
+            ghostCard.card = selectedCard
+
+            if (option.option.type == 0) {
+                optionEl.appendChild(ghostCard)
+            }
+
+            for (const { player, cards } of option.cards.map(s => ({ player: s.player, cards: s.cards.map(c => {
+                if (c.suit == "joker") {
+                    const joker = new Joker()
+                    joker.represents = new Card(c.represents.suit, c.represents.value)
+                    return joker
+                }
+                else {
+                    return new Card(c.suit, c.value)
+                }
+            })}))) {
+                for (const card of cards) {
+                    let cardEl = new CardEl()
+                    cardEl.card = card
+
+                    if (this.playerId != player) {
+                        cardEl.style.setProperty("--card-player-color", this.playerColors[player-1])
+                    }
+
+                    if (card instanceof Joker && card.represents.compareTo(selectedCard) == 0) {
+                        cardEl = ghostCard
+                    }
+
+                    optionEl.appendChild(cardEl)
+                }
+            }
+
+            if (option.option.type == 1) {
+                optionEl.appendChild(ghostCard)
+            }
+
+            this.appendChild(optionEl)
+
+        }
+    }
+
+    customElements.define("options-el", OptionsEl)
+</script>
