@@ -94,32 +94,12 @@ describe("Series", () => {
             expect(cards[1]).to.eq(joker)
             expect((cards[1] as Joker).represents.value).to.eq(three.value)
         })
-
         it("should handle invalid cards", () => {
             expect(() => Series.sortCards([two, four])).to.throw()
         })
     })
 
-    describe("place", () => {
-        it("should place", () => {
-            expect(series.series.length).to.eq(0)
-
-            series.place([two,three,four], player)
-
-            expect(series.series.length).to.eq(1)
-            expect(series.series[0].cards.length).to.eq(3)
-            expect(series.series[0].cards).to.deep.eq([two,three,four])
-            expect(series.series[0].player).to.eq(player)
-        })
-        it("should handle to few cards", () => {
-            expect(() => series.place([two,three], player)).to.throw()
-        })
-        it("should handle invalid cards", () => {
-            expect(() => series.place([two, four, five], player)).to.throw()
-        })
-    })
-
-    describe("validate", () => {
+    describe("validateSeries", () => {
         it("should handle no cards", () => {
             expect(Series.validateSeries([])).to.be.true
         })
@@ -137,6 +117,44 @@ describe("Series", () => {
         })
         it("should handle ace last", () => {
             expect(Series.validateSeries([two,three,four,five,six,seven,eight,nine,ten,jack,queen,king,ace])).not.to.be.false
+        })
+        it("should only call sortCards if sort is true", () => {
+            let called: boolean
+            const sortCards = Series.sortCards
+
+            Series.sortCards = (cards: Card[]) => {
+                called = true
+                return cards
+            }
+
+            called = false
+            Series.validateSeries([two], false)
+            expect(called).to.be.false
+
+            called = false
+            Series.validateSeries([two], true)
+            expect(called).to.be.true
+
+            Series.sortCards = sortCards
+        })
+    })
+
+    describe("place", () => {
+        it("should place", () => {
+            expect(series.series.length).to.eq(0)
+
+            series.place(threeCardsInOrder, player)
+
+            expect(series.series.length).to.eq(1)
+            expect(series.series[0].cards.length).to.eq(3)
+            expect(series.series[0].cards).to.deep.eq(threeCardsInOrder)
+            expect(series.series[0].player).to.eq(player)
+        })
+        it("should handle to few cards", () => {
+            expect(() => series.place([two,three], player)).to.throw()
+        })
+        it("should handle invalid cards", () => {
+            expect(() => series.place([two, four, five], player)).to.throw()
         })
     })
 
