@@ -14,96 +14,111 @@ describe("Board", () => {
         board = new Board(() => {}, () => {}, () => {}, () => {}, () => {}, () => {});
     })
 
-    describe("callbacks", () => {
-        
+    describe("createPlayer", () => {
+        it("should set constructor values", () => {
+            const player = board["createPlayer"]()
 
-        it("should call onCardAdded", () => {
+            expect(player.id).to.eq(1)
+            expect(player["board"]).to.eq(board)
+            expect(player["onFinishTurn"]).to.eq(board["nextTurn"])
+        })
+
+        it("should set onSeriesChanged", () => {
+            const seriesId = 0
             let called = false
-            const onCardAdded = (player: Player, card: Card) => {
-                expect(player.id).to.eq(1)
-                expect(card).to.eq(two)
+
+            board["onSeriesChanged"] = (p, sId) => {
+                expect(p).to.eq(player)
+                expect(sId).to.eq(seriesId)
                 called = true
             }
-            board = new Board(onCardAdded, () => {}, () => {}, () => {}, () => {}, () => {})
-            board.deck.clear()
-            board.deck.push(two)
-            const player = board.join()
 
-            player.draw()
+            const player = board["createPlayer"]()
+            
+            player["onSeriesChanged"](seriesId)
             expect(called).to.be.true
         })
 
-        it("should call onCardsRemoved", () => {
+        it("should set onCardsRemoved", () => {
             let called = false
-            const onCardsRemoved = (player: Player, cards: Card[]) => {
-                expect(player.id).to.eq(1)
-                expect(cards).to.deep.eq([two])
+
+            board["onCardsRemoved"] = (p, cs) => {
+                expect(p).to.eq(player)
+                expect(cs).to.deep.eq(threeCardsInOrder)
+                
                 called = true
             }
-            board = new Board(() => {}, onCardsRemoved, () => {}, () => {}, () => {}, () => {})
-            const player = board.join()
 
-            player["selectedCards"] = [two]
-            player.discard()
+            const player = board["createPlayer"]()
+
+            player["onCardsRemoved"](threeCardsInOrder)
             expect(called).to.be.true
         })
 
-        it("should call onCardSelected", () => {
+        it("should set onCardsRemoved", () => {
             let called = false
-            const onCardSelected = (player: Player, card: Card) => {
-                expect(player.id).to.eq(1)
-                expect(card).to.eq(two)
+
+            board["onCardsRemoved"] = (p, cs) => {
+                expect(p).to.eq(player)
+                expect(cs).to.deep.eq(threeCardsInOrder)
+                
                 called = true
             }
-            board = new Board(() => {}, () => {}, onCardSelected, () => {}, () => {}, () => {})
-            const player = board.join()
 
-            player["cards"] = [two]
-            player.select(0)
+            const player = board["createPlayer"]()
+
+            player["onCardsRemoved"](threeCardsInOrder)
             expect(called).to.be.true
         })
 
-        it("should call onCardDeselected", () => {
+        it("should set onCardAdded", () => {
+            const card = two
             let called = false
-            const onCardDeselected = (player: Player, card: Card) => {
-                expect(player.id).to.eq(1)
-                expect(card).to.eq(two)
+
+            board["onCardAdded"] = (p, c) => {
+                expect(p).to.eq(player)
+                expect(c).to.deep.eq(card)
+                
                 called = true
             }
-            board = new Board(() => {}, () => {}, () => {}, onCardDeselected, () => {}, () => {})
-            const player = board.join()
 
-            player["selectedCards"] = [two]
-            player.deselect(0)
+            const player = board["createPlayer"]()
+
+            player["onCardAdded"](card)
             expect(called).to.be.true
         })
 
-        it("should call onTurnChanged", () => {
+        it("should set onCardSelected", () => {
+            const card = two
             let called = false
-            const onTurnChanged = (player: Player) => {
-                expect(player.id).to.eq(1)
+
+            board["onCardSelected"] = (p, c) => {
+                expect(p).to.eq(player)
+                expect(c).to.deep.eq(card)
+                
                 called = true
             }
-            board = new Board(() => {}, () => {}, () => {}, () => {}, onTurnChanged, () => {})
-            const player = board.join()
 
-            player["selectedCards"] = [two]
-            player.discard()
+            const player = board["createPlayer"]()
+
+            player["onCardSelected"](card)
             expect(called).to.be.true
         })
 
-        it("should call onSeriesChanged", () => {
+        it("should set onCardDeselected", () => {
+            const card = two
             let called = false
-            const onSeriesChanged = (player: Player, seriesId: number) => {
-                expect(player.id).to.eq(1)
-                expect(seriesId).to.eq(0)
+
+            board["onCardDeselected"] = (p, c) => {
+                expect(p).to.eq(player)
+                expect(c).to.deep.eq(card)
+                
                 called = true
             }
-            board = new Board(() => {}, () => {}, () => {}, () => {}, () => {}, onSeriesChanged)
-            const player = board.join()
 
-            player["selectedCards"] = [two,three,four]
-            player.place()
+            const player = board["createPlayer"]()
+
+            player["onCardDeselected"](card)
             expect(called).to.be.true
         })
     })
