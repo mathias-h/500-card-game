@@ -1,9 +1,8 @@
 import { Board } from "./board"
 import { Card } from "../common/card"
 import { Player, AppendOption, ReplaceOption } from "./player"
-import { Series } from "./series"
 
-export class BoardSocket {
+export class SocketController {
     id: string
     private joining = true
 
@@ -21,8 +20,13 @@ export class BoardSocket {
         this.doAppend = this.doAppend.bind(this)
         this.startReplace = this.startReplace.bind(this)
         this.doReplace = this.doReplace.bind(this)
+        this.startGame = this.startGame.bind(this)
 
-        this.board = new Board(
+        this.board = this.createBoard()
+    }
+
+    private createBoard() {
+        return new Board(
             (player, card) => this.playerSockets[player.id-1].emit("card-added", card),
             (player, cards) => this.playerSockets[player.id-1].emit("cards-removed", cards),
             (player, card) => this.playerSockets[player.id-1].emit("card-selected", card),
@@ -35,27 +39,17 @@ export class BoardSocket {
     setSocket(socket: SocketIO.Socket) {
         this.socket = socket
 
-        socket.on("start-game", (callback: Function) => {
-            this.joining = false
+        socket.on("start-game", this.startGame)
+    }
 
-            this.board.players.forEach(player => player.firstDraw())
+    private startGame(callback: Function) {
+        this.joining = false
 
-            this.notifyTurn(this.board.players[0])
+        this.board.players.forEach(player => player.firstDraw())
 
-            callback({ ok: true })
+        this.notifyTurn(this.board.currentPlayer)
 
-            const p = this.board.players[0]
-
-            p.series[0] = new Series()
-            const two = new Card("hearts", "two")
-            const three = new Card("hearts", "three")
-            const four = new Card("hearts", "four")
-            const five = new Card("hearts", "five")
-            p.series[0]["insertSeries"](p, [two,three,four])
-            p["cards"].push(five)
-            p["onCardAdded"](five)
-            this.notifySeriesChange(p, 0)
-        })
+        callback({ ok: true })
     }
 
     private notifySeriesChange(player: Player, series: number) {
