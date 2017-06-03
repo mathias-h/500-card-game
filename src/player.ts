@@ -156,8 +156,9 @@ export class Player {
         this.onFinishTurn()
     }
 
-    draw() {
-        this.ensureYouHaveTurn()
+    draw(withoutTurn: boolean = false) {
+        if (!withoutTurn) this.ensureYouHaveTurn()
+
         const card = this.board.deck.pop()
         this.cards.push(card)
         this.onCardAdded(card)
@@ -175,7 +176,7 @@ export class Player {
 
     firstDraw() {
         for (let i = 0; i < 7; i++) {
-            this.draw()
+            this.draw(true)
         }
     }
 
