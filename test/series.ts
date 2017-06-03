@@ -36,7 +36,16 @@ describe("Series", () => {
             series["insertSeries"](player, [three, four, two])
 
             expect(series.series[0].player).to.eq(player)
-            expect(series.series[0].cards).to.deep.eq([two,three,four])
+            expect(series.series[0].cards).to.deep.eq(threeCardsInOrder)
+        })
+        it("should handle before", () => {
+            series.series[0] = { player, cards: [three] }
+            series["insertSeries"](player, [two], true)
+
+            expect(series.series[0].player).to.eq(player)
+            expect(series.series[0].cards).to.deep.eq([two])
+            expect(series.series[1].player).to.eq(player)
+            expect(series.series[1].cards).to.deep.eq([three])
         })
     })
 
