@@ -1,12 +1,18 @@
 import { Stack } from "./stack";
-import { Card, suits, values } from "./card"
+import { Card, Joker, suits, values } from "../common/card"
 
 export class Deck extends Stack<Card> {
-    constructor() {
-        const cards = []
-        cards.push(new Card("joker"))
-        cards.push(new Card("joker"))
-        cards.push(new Card("joker"))
+    constructor(noCards = false) {
+        if (noCards) {
+            super()
+            return
+        }
+
+        const cards: Card[] = []
+
+        cards.push(new Joker())
+        cards.push(new Joker())
+        cards.push(new Joker())
 
         for (let s = 0; s < 4; s++) {
             const suit = suits[s]
@@ -20,13 +26,11 @@ export class Deck extends Stack<Card> {
         }
 
         let currentIndex = cards.length
-        let temporaryValue
-        let randomIndex
 
-        while (0 !== currentIndex) {
-            randomIndex = Math.floor(Math.random() * currentIndex)
+        while (0 != currentIndex) {
+            const randomIndex = Math.floor(Math.random() * currentIndex)
             currentIndex -= 1
-            temporaryValue = cards[currentIndex]
+            const temporaryValue = cards[currentIndex]
             cards[currentIndex] = cards[randomIndex]
             cards[randomIndex] = temporaryValue
         }

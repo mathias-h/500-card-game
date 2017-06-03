@@ -1,5 +1,5 @@
 import { Deck } from "../src/deck"
-import { suits, values } from "../src/card"
+import { Joker, suits, values } from "../common/card"
 import { expect } from "chai"
 
 describe("Deck", () => {
@@ -24,7 +24,7 @@ describe("Deck", () => {
 
         while (!deck.isEmpty) {
             const card = deck.pop()
-            if (card.suit == "joker") {
+            if (card instanceof Joker) {
                 jokers += 1
             }
             else {
