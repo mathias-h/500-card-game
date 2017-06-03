@@ -59,6 +59,7 @@
 </style>
 
 <script src="/common/card.js"></script>
+
 <script>
     class CardEl extends HTMLElement {
         constructor() {
@@ -119,7 +120,7 @@
             }
         }
         valueToString() {
-            if (this._card.suit == "joker") return ""
+            if (this._card instanceof Joker) return ""
 
             switch (this._card.value) {
                 case "two": return "2"
