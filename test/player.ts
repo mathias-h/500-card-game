@@ -433,6 +433,11 @@ describe("Player", () => {
 
             expect(() => player.draw()).to.throw()
         })
+        it("should allow draw without being your turn", () => {
+            board.currentPlayer = player1
+
+            expect(() => player.draw(true)).to.not.throw()
+        })
         it("should call onCardAdded", () => {
             let called = false
             board.deck.push(two)
