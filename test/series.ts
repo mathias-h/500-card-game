@@ -20,6 +20,7 @@ describe("Series", () => {
     const queen = new Card(suits[0], "queen")
     const king = new Card(suits[0], "king")
     const ace = new Card(suits[0], "ace")
+    const threeCardsInOrder = [two,three,four]
     let joker: Joker
     let player: Player
     let series: Series

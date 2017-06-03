@@ -16,6 +16,7 @@ describe("Player", () => {
     const seven = new Card(suits[0], "seven")
     const eight = new Card(suits[0], "eight")
     const joker = new Joker()
+    const threeCardsInOrder = [two,three,four]
 
     beforeEach(() => {
         board = new Board(() => {}, () => {}, () => {}, () => {}, () => {}, () => {})
@@ -101,11 +102,11 @@ describe("Player", () => {
         it("should hande simple case", () => {
             board.currentPlayer = player
 
-            player["selectedCards"] = [two, three, four]
+            player["selectedCards"] = threeCardsInOrder
             player.place()
 
             expect(player["series"][0].series[0].player.id).to.eq(player.id)
-            expect(player["series"][0].series[0].cards).to.deep.eq([two,three,four])
+            expect(player["series"][0].series[0].cards).to.deep.eq(threeCardsInOrder)
             expect(player["selectedCards"].length).to.eq(0)
         })
 
@@ -116,9 +117,9 @@ describe("Player", () => {
         })
         it("should call onCardsRemoved", () => {
             let called = false
-            player["selectedCards"] = [two, three, four]
+            player["selectedCards"] = threeCardsInOrder
             player["onCardsRemoved"] = cards => {
-                expect(cards).to.deep.eq([two,three,four])
+                expect(cards).to.deep.eq(threeCardsInOrder)
                 called = true
             }
 
@@ -127,7 +128,7 @@ describe("Player", () => {
         })
         it("should call onSeriesChanged", () => {
             let called = false
-            player["selectedCards"] = [two, three, four]
+            player["selectedCards"] = threeCardsInOrder
             player["onSeriesChanged"] = seriesId => {
                 expect(seriesId).to.eq(0)
                 called = true
@@ -141,7 +142,7 @@ describe("Player", () => {
     describe("getAppendOptions", () => {
         it("should handle after", () => {
             player["series"][0] = new Series()
-            player["series"][0]["insertSeries"](player, [two, three, four])
+            player["series"][0]["insertSeries"](player, threeCardsInOrder)
             player["selectedCards"] = [five]
 
             const options = player.getAppendOptions()
@@ -188,7 +189,7 @@ describe("Player", () => {
             board.currentPlayer = player
 
             player["series"][0] = new Series()
-            player["series"][0]["insertSeries"](player, [two, three, four])
+            player["series"][0]["insertSeries"](player, threeCardsInOrder)
             player["selectedCards"] = [five]
 
             player.append({ player, series: 0, type: AppendType.after })
