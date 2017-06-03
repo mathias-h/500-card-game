@@ -17,7 +17,6 @@ export class Board {
         private onSeriesChanged: (player: Player, seriesId: number) => void,
     ) {
         this.nextTurn = this.nextTurn.bind(this)
-        this.onSeriesChanged = this.onSeriesChanged.bind(this)
     }
 
     private createPlayer() {
@@ -25,6 +24,7 @@ export class Board {
         const cardsRemoved = (cards: Card[]) => this.onCardsRemoved(player, cards)
         const cardSelected = (card: Card) => this.onCardSelected(player, card)
         const cardDeselected = (card: Card) => this.onCardDeselected(player, card)
+
         const player = new Player(
             this.players.length + 1,
             this,
@@ -34,6 +34,7 @@ export class Board {
             cardsRemoved,
             cardSelected,
             cardDeselected)
+
         return player
     }
 

@@ -9,6 +9,7 @@ describe("Board", () => {
     const two = new Card("hearts", "two")
     const three = new Card("hearts", "three")
     const four = new Card("hearts", "four")
+    const threeCardsInOrder = [two,three,four]
 
     beforeEach(() => {
         board = new Board(() => {}, () => {}, () => {}, () => {}, () => {}, () => {});
@@ -128,12 +129,11 @@ describe("Board", () => {
 
         players.push(board.join())
         expect(players[0].id).to.eq(1)
+        expect(board.currentPlayer).to.eq(players[0])
 
         players.push(board.join())
         expect(players[1].id).to.eq(2)
 
-        expect(players[0]["board"]).to.eq(board)
-        expect(players[0]["onFinishTurn"]).to.eq(board["nextTurn"])
         expect(board.currentPlayer).to.eq(players[0])
         expect(board.players).to.deep.eq(players)
     })
@@ -145,7 +145,9 @@ describe("Board", () => {
 
             const player = board.join()
             expect(board.players.length).to.eq(1)
+
             board.leave(player)
+
             expect(board.players.length).to.eq(0)
         })
         it("should handle player not found", () => {
