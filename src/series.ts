@@ -23,8 +23,9 @@ export class Series {
         const jokers: Joker[] = []
 
         for (let i = cards.length-1; i >= 0; i--) {
-            if (cards[i] instanceof Joker) {
-                jokers.push(cards[i] as Joker)
+            const joker = cards[i] as Joker
+            if (joker instanceof Joker) {
+                jokers.push(joker)
                 cards.splice(i, 1)
             }
         }
@@ -43,7 +44,6 @@ export class Series {
                     jokers.splice(i, 1)
                 }
             }
-
         }
 
         const aceIsFirstCard = cards.length > 1 && cards[0].value == "two" && cards[cards.length-1].value == "ace" && cards[cards.length-2].value != "king"
@@ -81,7 +81,6 @@ export class Series {
 
     static validateSeries(cards: Card[], sort: boolean = true) {
         if (cards.length == 0) return true
-
         if (sort) this.sortCards(cards)
 
         let previousCard = cards[0]
@@ -109,8 +108,7 @@ export class Series {
         if (appendType == AppendType.before && !this.series[0].cards[0].isValidAfter(cards[cards.length-1])) {
             throw new Error("appended cards must be valid before the existsing cards")
         }
-        
-        if (appendType == AppendType.after) {
+        else if (appendType == AppendType.after) {
             const lastSeries = this.series[this.series.length-1]
 
             if (!lastSeries.cards[lastSeries.cards.length-1].isValidBefore(cards[0])) {
@@ -131,7 +129,7 @@ export class Series {
                         series.cards.splice(cardPosition, 1, card)
                     }
                     else {
-                        throw new Error("you cannot replace with wrong card")
+                        throw new Error("you cannot replace with this card")
                     }
                 }
 
