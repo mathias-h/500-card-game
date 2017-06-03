@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Card, suits, values } from "../src/card";
+import { Card, Joker, suits, values } from "../common/card";
 
 describe("Card", () => {
     it("should create card", () => {
@@ -25,15 +25,18 @@ describe("Card", () => {
             expect(new Card(suits[0], "two").isValidAfter(new Card(suits[0], "ace"))).to.be.true
         })
         it("should handle joker", () => {
-            expect(new Card("joker").isValidAfter(new Card(suits[0], values[0]))).to.be.true
-            expect(new Card("joker").isValidAfter(new Card(suits[0], values[1]))).to.be.true
-            expect(new Card("joker").isValidAfter(new Card(suits[1], values[0]))).to.be.true
-            expect(new Card("joker").isValidAfter(new Card(suits[1], values[1]))).to.be.true
+            const j = new Joker()
+            j.represents = new Card(suits[0], values[1])
+            expect(j.isValidAfter(new Card(suits[0], values[0]))).to.be.true
 
-            expect(new Card(suits[0], values[0]).isValidAfter(new Card("joker"))).to.be.true
-            expect(new Card(suits[0], values[1]).isValidAfter(new Card("joker"))).to.be.true
-            expect(new Card(suits[1], values[0]).isValidAfter(new Card("joker"))).to.be.true
-            expect(new Card(suits[1], values[1]).isValidAfter(new Card("joker"))).to.be.true
+            expect(new Joker().isValidAfter(new Card(suits[0], values[1]))).to.be.true
+            expect(new Joker().isValidAfter(new Card(suits[1], values[0]))).to.be.true
+            expect(new Joker().isValidAfter(new Card(suits[1], values[1]))).to.be.true
+
+            expect(new Card(suits[0], values[0]).isValidAfter(new Joker())).to.be.true
+            expect(new Card(suits[0], values[1]).isValidAfter(new Joker())).to.be.true
+            expect(new Card(suits[1], values[0]).isValidAfter(new Joker())).to.be.true
+            expect(new Card(suits[1], values[1]).isValidAfter(new Joker())).to.be.true
         })
     })
 
@@ -51,15 +54,19 @@ describe("Card", () => {
             expect(new Card(suits[0], "ace").isValidBefore(new Card(suits[0], "two"))).to.be.true
         })
         it("should handle joker", () => {
-            expect(new Card("joker").isValidBefore(new Card(suits[0], values[0]))).to.be.true
-            expect(new Card("joker").isValidBefore(new Card(suits[0], values[1]))).to.be.true
-            expect(new Card("joker").isValidBefore(new Card(suits[1], values[0]))).to.be.true
-            expect(new Card("joker").isValidBefore(new Card(suits[1], values[1]))).to.be.true
+            expect(new Joker().isValidBefore(new Card(suits[0], values[0]))).to.be.true
 
-            expect(new Card(suits[0], values[0]).isValidBefore(new Card("joker"))).to.be.true
-            expect(new Card(suits[0], values[1]).isValidBefore(new Card("joker"))).to.be.true
-            expect(new Card(suits[1], values[0]).isValidBefore(new Card("joker"))).to.be.true
-            expect(new Card(suits[1], values[1]).isValidBefore(new Card("joker"))).to.be.true
+            const j = new Joker()
+            j.represents = new Card(suits[0], values[0])
+            expect(j.isValidBefore(new Card(suits[0], values[1]))).to.be.true
+            
+            expect(new Joker().isValidBefore(new Card(suits[1], values[0]))).to.be.true
+            expect(new Joker().isValidBefore(new Card(suits[1], values[1]))).to.be.true
+
+            expect(new Card(suits[0], values[0]).isValidBefore(new Joker())).to.be.true
+            expect(new Card(suits[0], values[1]).isValidBefore(new Joker())).to.be.true
+            expect(new Card(suits[1], values[0]).isValidBefore(new Joker())).to.be.true
+            expect(new Card(suits[1], values[1]).isValidBefore(new Joker())).to.be.true
         })
     })
 })
