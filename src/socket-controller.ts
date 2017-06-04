@@ -32,7 +32,8 @@ export class SocketController {
             (player, card) => this.playerSockets[player.id-1].emit("card-selected", card),
             (player, card) => this.playerSockets[player.id-1].emit("card-deselected", card),
             this.notifyTurn,
-            this.notifySeriesChange
+            this.notifySeriesChange,
+            this.onPileChanged
         )
     }
 
@@ -50,6 +51,10 @@ export class SocketController {
         this.notifyTurn(this.board.currentPlayer)
 
         callback({ ok: true })
+    }
+
+    private onPileChanged(card: Card) {
+        this.socket.emit("pile-changed", card)
     }
 
     private notifySeriesChange(player: Player, series: number) {

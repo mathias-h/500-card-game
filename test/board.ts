@@ -12,7 +12,7 @@ describe("Board", () => {
     const threeCardsInOrder = [two,three,four]
 
     beforeEach(() => {
-        board = new Board(() => {}, () => {}, () => {}, () => {}, () => {}, () => {});
+        board = new Board(() => {}, () => {}, () => {}, () => {}, () => {}, () => {}, () => {});
     })
 
     describe("createPlayer", () => {

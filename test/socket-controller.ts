@@ -1,6 +1,7 @@
 import { expect } from "chai"
 import { SocketController } from "../src/socket-controller"
 import { Player } from "../src/player"
+import { Series } from "../src/series"
 import { Card } from "../common/card"
 
 describe("BoardSocket", () => {
@@ -24,6 +25,7 @@ describe("BoardSocket", () => {
 
             expect(board["onTurnChanged"]).to.eq(socket["notifyTurn"])
             expect(board["onSeriesChanged"]).to.eq(socket["notifySeriesChange"])
+            expect(board.pile["onPileChanged"]).to.eq(socket["onPileChanged"])
         })
         it("should set onCardAdded", () => {
             let called = false
@@ -185,9 +187,56 @@ describe("BoardSocket", () => {
         })
     })
 
-    describe("notifySeriesChange", () => {})
+    describe("onPileChanged", () => {
+        it("should emit pile-changed event", () => {
+            let called = false
+            const socketMock: SocketIO.Socket = {
+                emit(eventName: String, card: Card) {
+                    expect(eventName).to.eq("pile-changed")
+                    expect(card).to.eq(two)
+                    called = true
+                },
+                on() {}
+            } as any
 
-    describe("handleError", () => {})
+            socket.setSocket(socketMock)
+
+            socket["onPileChanged"](two)
+
+            expect(called).to.be.true
+        })
+    })
+
+    describe("notifySeriesChange", () => {
+        it("should emit series-change event", () => {
+            let called = false
+            const player = socket.board["createPlayer"]()
+            const seriesId = 0
+            const cards = { [player.id]:threeCardsInOrder}
+            const socketMock: SocketIO.Socket = {
+                emit(eventName: String, pId: number, sId: number, cs: { [player: number]: Card[] }) {
+                    expect(eventName).to.eq("series-change")
+                    expect(pId).to.eq(player.id)
+                    expect(sId).to.eq(seriesId)
+                    expect(cards).to.deep.eq(cs)
+                    called = true
+                },
+                on() {}
+            } as any
+
+            socket.setSocket(socketMock)
+
+            const series = new Series()
+            series["insertSeries"](player, threeCardsInOrder)
+            player.series[0] = series
+
+            socket["notifySeriesChange"](player, seriesId)
+        })
+    })
+
+    describe("handleError", () => {
+        
+    })
 
     describe("join", () => {
         beforeEach(() => {

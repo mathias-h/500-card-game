@@ -6,7 +6,7 @@ export class Board {
     currentPlayer: Player
     players: Player[] = []
     deck: Deck = new Deck()
-    pile: Deck = new Deck(true)
+    pile: Deck
 
     constructor(
         private onCardAdded: (player: Player, card: Card) => void,
@@ -15,8 +15,11 @@ export class Board {
         private onCardDeselected: (player: Player, card: Card) => void,
         private onTurnChanged: (player: Player) => void,
         private onSeriesChanged: (player: Player, seriesId: number) => void,
+        onPileChanged: (card: Card) => void
     ) {
         this.nextTurn = this.nextTurn.bind(this)
+
+        this.pile = new Deck(true, onPileChanged)
     }
 
     private createPlayer() {

@@ -166,11 +166,12 @@ export class Player {
 
     drawPile() {
         this.ensureYouHaveTurn()
-        if (this.board.pile.isEmpty) throw new Error("there are not any card in the pile to draw")
-        while (!this.board.pile.isEmpty) {
-            const card = this.board.pile.pop()
-            this.cards.push(card)
+        
+        const cards = this.board.pile.drawAll()
+
+        for (const card of cards) {
             this.onCardAdded(card)
+            this.cards.push(card)    
         }
     }
 
