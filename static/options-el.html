@@ -90,7 +90,7 @@
                 optionEl.appendChild(ghostCard)
             }
 
-            for (const { player, cards } of option.cards.map(s => ({ player: s.player, cards: s.cards.map(c => {
+            const optionWithCards = option.cards.map(s => ({ player: s.player, cards: s.cards.map(c => {
                 if (c.suit == "joker") {
                     const joker = new Joker()
                     joker.represents = new Card(c.represents.suit, c.represents.value)
@@ -99,7 +99,9 @@
                 else {
                     return new Card(c.suit, c.value)
                 }
-            })}))) {
+            })}))
+
+            for (const { player, cards } of optionWithCards) {
                 for (const card of cards) {
                     let cardEl = new CardEl()
                     cardEl.card = card
