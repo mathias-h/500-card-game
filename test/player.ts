@@ -19,7 +19,7 @@ describe("Player", () => {
     const threeCardsInOrder = [two,three,four]
 
     beforeEach(() => {
-        board = new Board(() => {}, () => {}, () => {}, () => {}, () => {}, () => {})
+        board = new Board(() => {}, () => {}, () => {}, () => {}, () => {}, () => {}, () => {})
         player = board.join()
         player1 = board.join()
     })
