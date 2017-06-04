@@ -2,12 +2,17 @@ import { Stack } from "./stack";
 import { Card, Joker, suits, values } from "../common/card"
 
 export class Deck extends Stack<Card> {
-    constructor(noCards = false) {
+    private onPileChanged?: (card: Card) => void
+
+    constructor(noCards = false, onPileChanged?: (card: Card) => void) {
         if (noCards) {
             super()
+
+            this.onPileChanged = onPileChanged
+
             return
         }
-
+        
         const cards: Card[] = []
 
         cards.push(new Joker())
@@ -36,5 +41,25 @@ export class Deck extends Stack<Card> {
         }
 
         super(cards)
+    }
+
+    push(card: Card) {
+        super.push(card)
+
+        if (this.onPileChanged) this.onPileChanged(card)
+    }
+
+    drawAll() {
+        if (this.isEmpty) throw new Error("you cannot draw all cards if there are none")
+
+        const cards = []
+
+        while (!this.isEmpty) {
+            cards.push(this.pop())
+        }
+
+        if (this.onPileChanged) this.onPileChanged(null)
+
+        return cards
     }
 }
