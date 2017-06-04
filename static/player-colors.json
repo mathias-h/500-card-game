@@ -1,10 +1,10 @@
 [
-    "red",
-    "blue",
-    "green",
-    "yellow",
-    "orange",
-    "gold",
-    "silver",
-    "cyan"
+    "#F44336",
+    "#2196F3",
+    "#4CAF50",
+    "#FFEB3B",
+    "#673AB7",
+    "#FF9800",
+    "#FF4081",
+    "#607D8B" 
 ]
