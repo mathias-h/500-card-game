@@ -4,6 +4,14 @@ import { Card, Joker, suits } from "../common/card";
 import { Series } from "../src/series";
 import { expect } from "chai";
 
+const createSeries = (player: Player, ...cards: Card[][]) => {
+    const series = new Series()
+    for (const cs of cards) {
+        series["insertSeries"](player, cs)
+    }
+    return series
+}
+
 describe("Player", () => {
     let board: Board
     let player: Player
@@ -143,8 +151,7 @@ describe("Player", () => {
 
     describe("getAppendOptions", () => {
         it("should handle after", () => {
-            player["series"][0] = new Series()
-            player["series"][0]["insertSeries"](player, threeCardsInOrder)
+            player["series"][0] = createSeries(player, threeCardsInOrder)
             player["selectedCards"] = [five]
 
             const options = player.getAppendOptions()
@@ -153,8 +160,7 @@ describe("Player", () => {
         })
 
         it("should handle before", () => {
-            player["series"][0] = new Series()
-            player["series"][0]["insertSeries"](player, [three, four, five])
+            player["series"][0] = createSeries(player, [three, four, five])
             player["selectedCards"] = [two]
 
             const options = player.getAppendOptions()
@@ -229,8 +235,7 @@ describe("Player", () => {
         })
         it("should call onCardsRemoved", () => {
             let called = false
-            player["series"][0] = new Series()
-            player["series"][0]["insertSeries"](player, [two])
+            player["series"][0] = createSeries(player, [two])
             player["selectedCards"] = [three,four]
             player["onCardsRemoved"] = cards => {
                 expect(cards).to.deep.eq([three,four])
@@ -242,8 +247,7 @@ describe("Player", () => {
         })
         it("should call onSeriesChanged", () => {
             let called = false
-            player["series"][0] = new Series()
-            player["series"][0]["insertSeries"](player, [two])
+            player["series"][0] = createSeries(player, [two])
             player["selectedCards"] = [three,four]
             player["onSeriesChanged"] = seriesId => {
                 expect(seriesId).to.eq(0)
@@ -257,11 +261,8 @@ describe("Player", () => {
     
     describe("getReplaceOptions", () => {
         it("should handle basic case", () => {
-            const series = new Series()
-            
-            series["insertSeries"](player, [two,joker,four])
             player["selectedCards"] = [three]
-            player["series"] = [series]
+            player["series"][0] = createSeries(player, [two,joker,four])
 
             const options = player.getReplaceOptions()
 
@@ -290,13 +291,8 @@ describe("Player", () => {
             expect(options.length).to.eq(0)
         })
         it("should handle multiple series", () => {
-            const series = new Series()
-
-            series["insertSeries"](player, [two,joker])
-            series["insertSeries"](player, [four])
-
             player["selectedCards"] = [three]
-            player["series"] = [series]
+            player["series"][0] = createSeries(player, [two,joker], [four])
 
             const options = player.getReplaceOptions()
 
@@ -308,11 +304,9 @@ describe("Player", () => {
 
     describe("replace", () => {
         it("should handle simple case", () => {
-            const series = new Series()
-            series["insertSeries"](player, [two, joker])
-
+            const series = createSeries(player, [two, joker])
             player["selectedCards"] = [three]
-            player["series"] = [series]
+            player["series"][0] = series
 
             player.replace({ player, series: 0, card: 1 })
 
@@ -334,11 +328,9 @@ describe("Player", () => {
         })
         it("should call onCardAdded", () => {
             let called = false
-            const series = new Series()
-            series["insertSeries"](player, [two, joker])
-
             player["selectedCards"] = [three]
-            player["series"] = [series]
+            player["series"][0] = createSeries(player, [two, joker])
+
             player["onCardAdded"] = card => {
                 expect(card.suit).to.eq("joker")
                 called = true
@@ -349,11 +341,9 @@ describe("Player", () => {
         })
         it("should call onCardsRemoved", () => {
             let called = false
-            const series = new Series()
-            series["insertSeries"](player, [two, joker])
 
             player["selectedCards"] = [three]
-            player["series"] = [series]
+            player["series"][0] = createSeries(player, [two, joker])
             player["onCardsRemoved"] = cards => {
                 expect(cards).to.deep.eq([three])
                 called = true
@@ -364,11 +354,9 @@ describe("Player", () => {
         })
         it("should call onSeriesChanged", () => {
             let called = false
-            const series = new Series()
-            series["insertSeries"](player, [two, joker])
 
             player["selectedCards"] = [three]
-            player["series"] = [series]
+            player["series"][0] = createSeries(player, [two, joker])
             player["onSeriesChanged"] = seriesId => {
                 expect(seriesId).to.eq(0)
                 called = true
@@ -379,23 +367,36 @@ describe("Player", () => {
         })
     })
 
-    describe("discard", () => {
+    describe("endTurn", () => {
         it("should handle simple case", () => {
             player["selectedCards"] = [two]
 
-            player.discard()
+            player.endTurn()
 
             expect(player["selectedCards"].length).to.eq(0)
             expect(board.pile.peek()).to.eq(two)
         })
-        it("should only allow one card", () => {
-            expect(() => player.discard()).to.throw()
-
+        it("should only allow one or zero card", () => {
+            board.currentPlayer = player
             player["selectedCards"] = [two,three]
-            expect(() => player.discard()).to.throw()
+            expect(() => player.endTurn()).to.throw()
 
+            board.currentPlayer = player
             player["selectedCards"] = [two]
-            expect(() => player.discard()).to.not.throw()
+            expect(() => player.endTurn()).to.not.throw()
+
+            board.currentPlayer = player
+            player["selectedCards"] = []
+            expect(() => player.endTurn()).to.not.throw()
+        })
+        it("if you have cards to select you must", () => {
+            player["cards"] = [two]
+            player["selectedCards"] = []
+            expect(() => player.endTurn()).to.throw()
+
+            player["cards"] = []
+            player["selectedCards"] = []
+            expect(() => player.endTurn()).to.not.throw()
         })
         it("should fisish turn", () => {
             let called = false
@@ -405,13 +406,13 @@ describe("Player", () => {
 
             player["selectedCards"] = [two]
 
-            player.discard()
+            player.endTurn()
             expect(called).to.be.true
         })
         it("should throw when you do not have turn", () => {
             board.currentPlayer = player1
 
-            expect(() => player.discard()).to.throw()
+            expect(() => player.endTurn()).to.throw()
         })
         it("should call onCardsRemoved", () => {
             let called = false
@@ -421,7 +422,7 @@ describe("Player", () => {
                 called = true
             }
 
-            player.discard()
+            player.endTurn()
             expect(called).to.be.true
         })
         it("should call onFinishTurn", () => {
@@ -431,7 +432,43 @@ describe("Player", () => {
                 called = true
             }
 
-            player.discard()
+            player.endTurn()
+            expect(called).to.be.true
+        })
+        it("should call onFinishTurn with true if you discard last card", () => {
+            let called = false
+            player["cards"] = []
+            player["selectedCards"] = [two]
+            player["onFinishTurn"] = (hasWon: boolean) => {
+                expect(hasWon).to.be.true
+                called = true
+            }
+
+            player.endTurn()
+            expect(called).to.be.true
+        })
+        it("should call onFinishTurn with false if you have cards left", () => {
+            let called = false
+            player["cards"] = [two]
+            player["selectedCards"] = [three]
+            player["onFinishTurn"] = (hasWon: boolean) => {
+                expect(hasWon).to.be.false
+                called = true
+            }
+
+            player.endTurn()
+            expect(called).to.be.true
+        })
+        it("should not call onFinishTrun with ture if you do dot have a card to discard", () => {
+            let called = false
+            player["cards"] = []
+            player["selectedCards"] = []
+            player["onFinishTurn"] = (hasWon: boolean) => {
+                expect(hasWon).to.be.false
+                called = true
+            }
+
+            player.endTurn()
             expect(called).to.be.true
         })
     })
@@ -581,11 +618,8 @@ describe("Player", () => {
 
     describe("getCardsFromOption", () => {
         it("should handle simple case", () => {
-            const series = new Series()
-
-            series["insertSeries"](player, [two])
+            const series = createSeries(player, [two])
             series["insertSeries"](player1, [three])
-
             player["series"][0] = series
 
             const cards = Player.getCardsFromOption({ player, series: 0 })

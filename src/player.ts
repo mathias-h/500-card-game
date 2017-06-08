@@ -30,7 +30,7 @@ export class Player {
     constructor(
         public id: number,
         private board: Board,
-        private onFinishTurn: () => void,
+        private onFinishTurn: (hasWon: boolean) => void,
         onSeriesChanged: (player: Player, seriesId: number) => void,
         private onCardAdded: (card: Card) => void,
         private onCardsRemoved: (card: Card[]) => void,
@@ -45,7 +45,7 @@ export class Player {
         this.getReplaceOptions = this.getReplaceOptions.bind(this)
         this.drawPile = this.drawPile.bind(this)
         this.draw = this.draw.bind(this)
-        this.discard = this.discard.bind(this)
+        this.endTurn = this.endTurn.bind(this)
     }
 
     select(index: number) {
@@ -189,13 +189,32 @@ export class Player {
         this.onSeriesChanged(option.series)
     }
 
-    discard() {
+    endTurn() {
         this.ensureYouHaveTurn()
-        if (this.selectedCards.length != 1) throw new Error("you must select one card to discard")
-        this.board.pile.push(this.selectedCards[0])
-        this.onCardsRemoved(this.selectedCards)
-        this.selectedCards = []
-        this.onFinishTurn()
+
+        const hasWon = this.hasWon()
+
+        this.discard()
+
+        this.onFinishTurn(hasWon)
+    }
+
+    private discard() {
+        if (this.selectedCards.length > 1) throw new Error("yout can only end turn with one of zero cards selected")
+        if (this.selectedCards.length == 0 && this.cards.length > 0) throw new Error("you must select one card if you have any to select")
+
+        if (this.selectedCards) {
+            this.board.pile.push(this.selectedCards[0])
+            this.onCardsRemoved(this.selectedCards)
+            this.selectedCards = []
+        }
+    }
+
+    private hasWon() {
+        const youDoNotHaveAnyCardsToDiscard = this.selectedCards.length == 0 && this.cards.length == 0
+        const youHaveMoreCards = this.cards.length != 0
+        
+        return !(youDoNotHaveAnyCardsToDiscard || youHaveMoreCards)
     }
 
     draw(withoutTurn: boolean = false) {
