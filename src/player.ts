@@ -75,29 +75,71 @@ export class Player {
     }
 
     getAppendOptions(): AppendOption[] {
-        const options: AppendOption[] = []
-        if (!Series.validateSeries(this.selectedCards)) throw new Error("selected cards are invalid")
-        if (this.selectedCards.length == 0) return options
-        const firstSelectedCard = this.selectedCards[0]
-        const lastSelectedCard = this.selectedCards[this.selectedCards.length-1]
-        for (const player of this.board.players) {
-            for (let i = 0; i < player.series.length; i++) {
-                const series = player.series[i]
-                const seriesFirstCard = series.series[0].cards[0]
-                const lastSeries = series.series[series.series.length-1]
-                const seriesLastCard = lastSeries.cards[lastSeries.cards.length-1]
-                let type: AppendType = AppendType.invalid
-                if (firstSelectedCard.isValidAfter(seriesLastCard)) type = AppendType.after
-                else if (lastSelectedCard.isValidBefore(seriesFirstCard)) type = AppendType.before
-                if (type != AppendType.invalid) {
-                    options.push({
-                        series: i,
-                        type,
-                        player
-                    })
+        const iterateAllSeries = (f: (player: Player, seriesIndex: number) => void) => {
+            for (const player of this.board.players) {
+                for (let i = 0; i < player.series.length; i++) {
+                    f(player, i)
                 }
             }
         }
+        const options: AppendOption[] = []
+        let validity = false
+
+        try {
+            validity = Series.validateSeries(this.selectedCards)
+        } catch (error) {
+            if (error.message == "you cannot only have a joker") {
+                iterateAllSeries((player, i) => {
+                    const series = player.series[i]
+                    const firstCard = series.series[0].cards[0].value
+                    const lastSeries = series.series[series.series.length-1]
+                    const lastCard = lastSeries.cards[lastSeries.cards.length-1].value
+
+                    if ((firstCard == "ace" && lastCard == "ace") || firstCard != "ace") {
+                        options.push({
+                            series: i,
+                            type: AppendType.before,
+                            player
+                        })
+                    }
+                    if ((firstCard == "ace" && lastCard == "ace") || lastCard != "ace") {
+                        options.push({
+                            series: i,
+                            type: AppendType.after,
+                            player
+                        })
+                    }
+                })
+
+                return options
+            }
+            else {
+                throw error
+            }
+        }
+
+        if (!validity) throw new Error("selected cards are invalid")
+        if (this.selectedCards.length == 0) return options
+        const firstSelectedCard = this.selectedCards[0]
+        const lastSelectedCard = this.selectedCards[this.selectedCards.length-1]
+        
+        iterateAllSeries((player, i) => {
+            const series = player.series[i]
+            const seriesFirstCard = series.series[0].cards[0]
+            const lastSeries = series.series[series.series.length-1]
+            const seriesLastCard = lastSeries.cards[lastSeries.cards.length-1]
+            let type: AppendType = AppendType.invalid
+            if (firstSelectedCard.isValidAfter(seriesLastCard)) type = AppendType.after
+            else if (lastSelectedCard.isValidBefore(seriesFirstCard)) type = AppendType.before
+            if (type != AppendType.invalid) {
+                options.push({
+                    series: i,
+                    type,
+                    player
+                })
+            }
+        })
+                
         return options
     }
 

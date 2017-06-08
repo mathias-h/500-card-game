@@ -15,6 +15,8 @@ describe("Player", () => {
     const six = new Card(suits[0], "six")
     const seven = new Card(suits[0], "seven")
     const eight = new Card(suits[0], "eight")
+    const king = new Card(suits[0], "king")
+    const ace = new Card(suits[0], "ace")
     const joker = new Joker()
     const threeCardsInOrder = [two,three,four]
 
@@ -173,14 +175,36 @@ describe("Player", () => {
         })
 
         it("should handle multiple series", () => {
-            player["series"][0] = new Series()
-            player["series"][0]["insertSeries"](player, [two])
-            player["series"][0]["insertSeries"](player, [three])
+            player["series"][0] = createSeries(player, [two], [three])
             player["selectedCards"] = [four]
 
             const options = player.getAppendOptions()
 
             expect(options[0]).to.deep.eq({ player, series: 0, type: AppendType.after })
+        })
+        it("should get append options with single joker", () => {
+            player["series"][0] = createSeries(player, threeCardsInOrder)
+            player["series"][1] = createSeries(player, [ace,two])
+            player["series"][2] = createSeries(player, [king,ace])
+            player["series"][3] = createSeries(player, [ace])
+            player1["series"][0] = createSeries(player, threeCardsInOrder)
+            player["selectedCards"] = [joker]
+
+            const options = player.getAppendOptions()
+
+            expect(options.length).to.eq(8)
+            expect(options[0]).to.deep.eq({ player, series: 0, type: AppendType.before })
+            expect(options[1]).to.deep.eq({ player, series: 0, type: AppendType.after })
+            expect(options[2]).to.deep.eq({ player, series: 1, type: AppendType.after })
+            expect(options[3]).to.deep.eq({ player, series: 2, type: AppendType.before })
+            expect(options[4]).to.deep.eq({ player, series: 3, type: AppendType.before })
+            expect(options[5]).to.deep.eq({ player, series: 3, type: AppendType.after })
+            expect(options[6]).to.deep.eq({ player: player1, series: 0, type: AppendType.before })
+            expect(options[7]).to.deep.eq({ player: player1, series: 0, type: AppendType.after })
+        })
+
+        it("should get append options with multiple jokers", () => {
+            
         })
     })
 
@@ -188,8 +212,7 @@ describe("Player", () => {
         it("should handle simple case", () => {
             board.currentPlayer = player
 
-            player["series"][0] = new Series()
-            player["series"][0]["insertSeries"](player, threeCardsInOrder)
+            player["series"][0] = createSeries(player, threeCardsInOrder)
             player["selectedCards"] = [five]
 
             player.append({ player, series: 0, type: AppendType.after })
