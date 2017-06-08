@@ -2,6 +2,10 @@ import { expect } from "chai";
 import { Card, Joker, suits, values } from "../common/card";
 
 describe("Card", () => {
+    const two = new Card(suits[0], "two")
+    const three = new Card(suits[0], "three")
+    const ace = new Card(suits[0], "ace")
+
     it("should create card", () => {
         new Card(suits[0], values[0])
         new Card(suits[1], values[0])
@@ -11,7 +15,7 @@ describe("Card", () => {
         expect(() => new Card(suits[0], "NOT_VALUES")).to.throw()
     })
 
-    describe("valid after", () => {
+    describe("isValidAfter", () => {
         it("should be valid", () => {
             expect(new Card(suits[0], values[1]).isValidAfter(new Card(suits[0], values[0]))).to.be.true
             expect(new Card(suits[0], values[values.length-1]).isValidAfter(new Card(suits[0], values[values.length-2]))).to.be.true
@@ -40,7 +44,7 @@ describe("Card", () => {
         })
     })
 
-    describe("valid before", () => {
+    describe("isValidBefore", () => {
         it("should be valid", () => {
             expect(new Card(suits[0], values[0]).isValidBefore(new Card(suits[0], values[1]))).to.be.true
             expect(new Card(suits[0], values[values.length-2]).isValidBefore(new Card(suits[0], values[values.length-1]))).to.be.true
@@ -67,6 +71,33 @@ describe("Card", () => {
             expect(new Card(suits[0], values[1]).isValidBefore(new Joker())).to.be.true
             expect(new Card(suits[1], values[0]).isValidBefore(new Joker())).to.be.true
             expect(new Card(suits[1], values[1]).isValidBefore(new Joker())).to.be.true
+        })
+    })
+
+    describe("subtract", () => {
+        it("should subtract value from card", () => {
+            const subtractedTwo = three.subtract()
+
+            expect(subtractedTwo.suit).to.eq(three.suit)
+            expect(subtractedTwo.value).to.eq(two.value)
+        })
+        it("should handle subtract from two", () => {
+            const subtractedAce = two.subtract()
+
+            expect(subtractedAce.suit).to.eq(two.suit)
+            expect(subtractedAce.value).to.eq(ace.value)
+        })
+    })
+
+    describe("add", () => {
+        it("should add value to card", () => {
+            const addedThree = two.add()
+
+            expect(addedThree.suit).to.eq(two.suit)
+            expect(addedThree.value).to.eq(three.value)
+        })
+        it("should not allow add on ace", () => {
+            expect(() => ace.add()).to.throw()
         })
     })
 })

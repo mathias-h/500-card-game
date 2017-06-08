@@ -76,6 +76,21 @@ class Card {
             values.indexOf(self.value as any) - values.indexOf(c.value as any) == -1)
     }
 
+    subtract() {
+        if (this.value == "two") {
+            return new Card(this.suit, "ace")
+        }
+        else {
+            return new Card(this.suit, values[values.findIndex(v => this.value == v)-1])
+        }
+    }
+
+    add() {
+        if (this.value == "ace") throw new Error("you cannot add to a ace")
+
+        return new Card(this.suit, values[values.findIndex(v => this.value == v)+1])
+    }
+
     compareTo(c: Card) {
         if (c instanceof Joker && c.represents) c = c.represents
 
