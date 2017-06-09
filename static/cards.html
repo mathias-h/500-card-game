@@ -1,0 +1,42 @@
+<style>
+    cards-el {
+        display: flex;
+        
+    }
+</style>
+<script>
+    class CardsEl extends HTMLElement {
+        constructor() {
+            super()
+
+            this.onPileChanged = this.onPileChanged.bind(this)
+            this.onDeckEmpty = this.onDeckEmpty.bind(this)
+        }
+        connectedCallback() {
+            this.innerHTML = `
+                <card-el class="pile"></card-el>
+                <div class="deck"></div>
+            `
+
+            this.pileEl = this.querySelector(".pile")
+            this.deck = this.querySelector(".deck")
+        }
+
+        setSocket(socket) {
+            socket.on("pile-changed", this.onPileChanged)
+            socket.on("deck-empty", this.onDeckEmpty)
+        }
+
+        onPileChanged(card) {
+            if (card != null) card = new Card(card.suit, card.value)
+
+            this.pileEl.card = card
+        }
+
+        onDeckEmpty() {
+            this.deck.setAttribute("empty")
+        }
+    }
+
+    customElements.define("cards-el", CardsEl)
+</script>
