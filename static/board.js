@@ -77,7 +77,9 @@ window.onload = () =>
 
                         seriesEl.innerHTML = ""
 
-                        for (const { player, cards } of seriesCards) {
+                        for (const player of Object.keys(seriesCards)) {
+                            const cards = seriesCards[player]
+
                             for (const card of cards) {
                                 const cardEl = new CardEl()
                                 cardEl.card = new Card(card.suit, card.value)

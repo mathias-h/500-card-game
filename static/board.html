@@ -19,18 +19,29 @@
             }
 
             #score-board {
+                flex-direction: column;
                 border: 1px solid;
                 padding: 10px;
             }
             #score-board .player {
                 color: var(--player-color);
-
+                margin-bottom: 16px;
+            }
+            #score-board .player:last-child {
+                margin-bottom: 0;
             }
             #score-board .player p:first-child {
                 margin: 0 5px 0 0;
             }
             #score-board .player p:last-child {
                 margin: 0;
+            }
+
+            cards-el {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
             }
         </style>
         <script src="board.js" async defer></script>
