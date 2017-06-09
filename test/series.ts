@@ -47,6 +47,9 @@ describe("Series", () => {
             expect(series.series[1].player).to.eq(player)
             expect(series.series[1].cards).to.deep.eq([three])
         })
+        it("should handle only joker", () => {
+            expect(() => series["insertSeries"](player, [joker])).to.not.throw()
+        })
     })
 
     describe("sortCards", () => {
@@ -118,6 +121,9 @@ describe("Series", () => {
         it("should handle ace last", () => {
             expect(Series.validateSeries([two,three,four,five,six,seven,eight,nine,ten,jack,queen,king,ace])).not.to.be.false
         })
+        it("should handle single joker", () => {
+            expect(() => Series.validateSeries([joker])).to.throw("you cannot only have a joker")
+        })
         it("should only call sortCards if sort is true", () => {
             let called: boolean
             const sortCards = Series.sortCards
@@ -171,15 +177,54 @@ describe("Series", () => {
         })
 
         it("should handle before", () => {
-            series["insertSeries"](player, [three,four,five])
+            series["insertSeries"](player, threeCardsInOrder)
 
-            series.append([two], player, AppendType.before)
+            series.append([ace], player, AppendType.before)
 
             expect(series.series.length).to.eq(2)
-            expect(series.series[0].cards[0]).to.eq(two)
+            expect(series.series[0].cards.length).to.eq(1)
+            expect(series.series[0].cards[0]).to.eq(ace)
             expect(series.series[0].player).to.eq(player)
-            expect(series.series[1].cards).to.deep.eq([three,four,five])
+            expect(series.series[1].cards).to.deep.eq(threeCardsInOrder)
             expect(series.series[1].player).to.eq(player)
+        })
+        it("should handle joker append before", () => {
+            series["insertSeries"](player, threeCardsInOrder)
+
+            series.append([joker], player, AppendType.before)
+
+            expect(series.series.length).to.eq(2)
+            expect(series.series[0].cards.length).to.eq(1)
+            expect(series.series[0].cards[0]).to.eq(joker)
+            expect((series.series[0].cards[0] as Joker).represents.value).to.eq(ace.value)
+            expect(series.series[0].player).to.eq(player)
+            expect(series.series[1].cards).to.deep.eq(threeCardsInOrder)
+            expect(series.series[1].player).to.eq(player)
+        })
+        it("should handle joker append after", () => {
+            series["insertSeries"](player, threeCardsInOrder)
+
+            series.append([joker], player, AppendType.after)
+
+            expect(series.series.length).to.eq(2)
+            expect(series.series[1].cards.length).to.eq(1)
+            expect(series.series[1].cards[0]).to.eq(joker)
+            expect((series.series[1].cards[0] as Joker).represents.value).to.eq(five.value)
+            expect(series.series[1].player).to.eq(player)
+            expect(series.series[0].cards).to.deep.eq(threeCardsInOrder)
+            expect(series.series[0].player).to.eq(player)
+        })
+        it("should handle joker append before two", () => {
+            series["insertSeries"](player, threeCardsInOrder)
+
+            series.append([joker], player, AppendType.before)
+
+            expect((series.series[0].cards[0] as Joker).represents.value).to.eq(ace.value)
+        })
+        it("should not allow joker append before ace", () => {
+            series["insertSeries"](player, [ace,two,three])
+
+            expect(() => series.append([joker], player, AppendType.before)).to.throw("you cannot place joker before ace")
         })
         it("should not allow wrong cards to be appended after", () => {
             series["insertSeries"](player, threeCardsInOrder)
@@ -191,6 +236,13 @@ describe("Series", () => {
 
             expect(() => series.append([two], player, AppendType.before)).to.throw()
         })
+        it("should handle multiple jokers before", () => {
+
+        })
+        it("should handle multiple jokers after", () => {
+
+        })
+
     })
 
     describe("replace", () => {

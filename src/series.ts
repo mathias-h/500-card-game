@@ -5,7 +5,16 @@ export class Series {
     series: { player: Player, cards: Card[] }[] = []
 
     private insertSeries(player: Player, cards: Card[], before = false) {
-        Series.sortCards(cards)
+        try {
+            Series.sortCards(cards)
+        } catch (error) {
+            if (error.message == "you cannot only have a joker") {
+                // OK
+            }
+            else {
+                throw error
+            }
+        }
         
         const series = { player, cards }
 
@@ -36,7 +45,7 @@ export class Series {
             for (let c = cards.length-1; c >= 1; c--) {
                 const card = cards[c]
                 const prevCard = cards[c-1]
-                const representedCard = new Card(card.suit, values[values.indexOf(card.value as any) - 1])
+                const representedCard = card.subtract()
 
                 if (representedCard.isValidAfter(prevCard) && representedCard.isValidBefore(card)) {
                     joker.represents = representedCard
@@ -54,15 +63,18 @@ export class Series {
 
         if (jokers.length != 0) {
             if (cards.length == 0) {
+                cards.push(...jokers)
                 throw new Error("you cannot only have a joker")
             }
 
             const lastCard = cards[cards.length-1]
-            const lastRepresentedCard = new Card(lastCard.suit, values[values.indexOf(lastCard.value as any)+1])
-            if (lastRepresentedCard.isValidAfter(lastCard)) {
-                jokers[0].represents = lastRepresentedCard
-                cards.push(jokers[0])
-                jokers.splice(0, 1)
+            if (lastCard.value != "ace") {
+                const lastRepresentedCard = lastCard.add()
+                if (lastRepresentedCard.isValidAfter(lastCard)) {
+                    jokers[0].represents = lastRepresentedCard
+                    cards.push(jokers[0])
+                    jokers.splice(0, 1)
+                }
             }
 
             if (jokers.length != 0) {
@@ -103,7 +115,40 @@ export class Series {
 
     append(cards: Card[], player: Player, appendType: AppendType) {
         if (cards.length < 1) throw new Error("you must append at least one card")
-        if (!Series.validateSeries(cards)) throw new Error("cards are invalid")
+        let validity = false
+
+        try {
+            validity = Series.validateSeries(cards)
+        } catch (error) {
+            if (error.message == "you cannot only have a joker") {
+                const joker: Joker = cards[0]
+
+                if (appendType == AppendType.before) {
+                    const firstCard = this.series[0].cards[0]
+
+                    if (firstCard.value != "ace") {
+                        const beforeRepresentedCard = firstCard.subtract()
+                        joker.represents = beforeRepresentedCard
+                        validity = true
+                    }
+                    else {
+                        throw new Error("you cannot place joker before ace")
+                    }
+                }
+                else if (appendType == AppendType.after) {
+                    const lastSeries = this.series[this.series.length-1]
+                    const lastCard = lastSeries.cards[lastSeries.cards.length-1]
+                    const afterRepresentedCard = lastCard.add()
+                    joker.represents = afterRepresentedCard
+                    validity = true
+                }
+            }
+            else {
+                throw error
+            }
+        }
+
+        if (!validity) throw new Error("cards are invalid")
 
         if (appendType == AppendType.before && !this.series[0].cards[0].isValidAfter(cards[cards.length-1])) {
             throw new Error("appended cards must be valid before the existsing cards")
