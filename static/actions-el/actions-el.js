@@ -13,14 +13,14 @@ class ActionsEl extends HTMLElement {
             <button class="append" disabled>append</button>
             <button class="replace" disabled>repalce</button>
             <button class="draw-pile" disabled>draw pile</button>
-            <button class="discard" disabled>discard</button>
+            <button class="end-turn" disabled>end turn</button>
         `
 
         this.place = this.querySelector(".place")
         this.append = this.querySelector(".append")
         this.replace = this.querySelector(".replace")
         this.drawPile = this.querySelector(".draw-pile")
-        this.discard = this.querySelector(".discard")
+        this.endTurn = this.querySelector(".end-turn")
     }
 
     handleError(fn) {
@@ -41,14 +41,14 @@ class ActionsEl extends HTMLElement {
                 this.append.disabled = false
                 this.replace.disabled = false
                 this.drawPile.disabled = false
-                this.discard.disabled = false
+                this.endTurn.disabled = false
             }
             else {
                 this.place.disabled = true
                 this.append.disabled = true
                 this.replace.disabled = true
                 this.drawPile.disabled = true
-                this.discard.disabled = true
+                this.endTurn.disabled = true
             }
         })
 
@@ -56,7 +56,7 @@ class ActionsEl extends HTMLElement {
         this.append.addEventListener("click", _ => socket.emit("start-append", this.startAppend()))
         this.replace.addEventListener("click", _ => socket.emit("start-replace", this.startReplace()))
         this.drawPile.addEventListener("click", _ => socket.emit("do-draw-pile", this.handleError()))
-        this.discard.addEventListener("click", _ => socket.emit("do-discard", this.handleError()))
+        this.endTurn.addEventListener("click", _ => socket.emit("do-end-turn", this.handleError()))
     }
 
     startAppend() {
