@@ -75,28 +75,35 @@
         }
 
         display() {
-            const s = this.suitToString()
-            const v = this.valueToString()
+            if (this.card == null) {
+                this.innerHTML = ""
+                this.setAttribute("empty", "")
+            }
+            else {
+                const s = this.suitToString()
+                const v = this.valueToString()
 
-            this.style.setProperty("--card-color", this.getColor())
+                this.removeAttribute("empty")
+                this.style.setProperty("--card-color", this.getColor())
 
-            this.innerHTML = `
-                <div class="top">
-                    <p>${s}</p>
-                    <p>${v}</p>
-                </div>
-                <div class="flex"></div>
-                <div class="middle">${s}</div>
-                <div class="flex"></div>
-                <div class="bottom">
-                    <p>${v}</p>
-                    <p>${s}</p>
-                </div>
-            `
+                this.innerHTML = `
+                    <div class="top">
+                        <p>${s}</p>
+                        <p>${v}</p>
+                    </div>
+                    <div class="flex"></div>
+                    <div class="middle">${s}</div>
+                    <div class="flex"></div>
+                    <div class="bottom">
+                        <p>${v}</p>
+                        <p>${s}</p>
+                    </div>
+                `
+            }
         }
 
         getColor() {
-            switch (this._card.suit) {
+            switch (this.card.suit) {
                 case "hearts":
                 case "diamonds":
                     return "red"
@@ -105,24 +112,24 @@
                 case "joker":
                     return "black"
                 default:
-                    throw new Error("invalid suit value " + this._card.suit)
+                    throw new Error("invalid suit value " + this.card.suit)
             }
         }
 
         suitToString() {
-            switch (this._card.suit) {
+            switch (this.card.suit) {
                 case "hearts": return "♥"
                 case "spades": return "♠"
                 case "diamonds": return "♦"
                 case "clubs": return "♣"
                 case "joker": return "J"
-                default: throw new Error("invalid suit value " + this._card.suit)
+                default: throw new Error("invalid suit value " + this.card.suit)
             }
         }
         valueToString() {
-            if (this._card instanceof Joker) return ""
+            if (this.card.suit == "joker") return ""
 
-            switch (this._card.value) {
+            switch (this.card.value) {
                 case "two": return "2"
                 case "three": return "3"
                 case "four": return "4"
@@ -136,7 +143,7 @@
                 case "queen": return "Q"
                 case "king": return "K"
                 case "ace": return "A"
-                default: throw new Error("invalid value " + this._card.value)
+                default: throw new Error("invalid value " + this.card.value)
             }
         }
     }
