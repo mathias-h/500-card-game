@@ -406,7 +406,7 @@ describe("BoardSocket", () => {
         })
 
         it("should handle do-draw-pile event", () => {})
-        it("should handle do-discard event", () => {})
+        it("should handle do-end-turn event", () => {})
 
         it("should not allow joing when false", () => {
             expect(socket["board"].players.length).to.eq(0)

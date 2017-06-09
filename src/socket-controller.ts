@@ -15,6 +15,7 @@ export class SocketController {
 
         this.notifyTurn = this.notifyTurn.bind(this)
         this.notifySeriesChange = this.notifySeriesChange.bind(this)
+        this.onPileChanged = this.onPileChanged.bind(this)
         this.handleError = this.handleError.bind(this)
         this.startAppend = this.startAppend.bind(this)
         this.doAppend = this.doAppend.bind(this)
@@ -96,7 +97,7 @@ export class SocketController {
             socket.on("start-replace", this.startReplace(player))
             socket.on("do-replace", this.doReplace())
             socket.on("do-draw-pile", this.handleError(player.drawPile))
-            socket.on("do-discard", this.handleError(player.discard))
+            socket.on("do-end-turn", this.handleError(player.endTurn))
 
             return player
         }
