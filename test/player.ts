@@ -618,14 +618,19 @@ describe("Player", () => {
 
     describe("getCardsFromOption", () => {
         it("should handle simple case", () => {
-            const series = createSeries(player, [two])
-            series["insertSeries"](player1, [three])
+            const playerCards = [two]
+            const player1Cards = [two]
+            const series = createSeries(player, playerCards)
+            series["insertSeries"](player1, player1Cards)
             player["series"][0] = series
 
             const cards = Player.getCardsFromOption({ player, series: 0 })
 
-            expect(cards[player.id]).to.deep.eq([two])
-            expect(cards[player1.id]).to.deep.eq([three])
+            expect(cards.length).to.eq(2)
+            expect(cards[0].player).to.eq(player)
+            expect(cards[0].cards).to.eq(playerCards)
+            expect(cards[1].player).to.eq(player1)
+            expect(cards[1].cards).to.eq(player1Cards)
         })
     })
 })

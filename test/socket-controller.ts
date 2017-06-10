@@ -1,5 +1,5 @@
 import { expect } from "chai"
-import { SocketController } from "../src/socket-controller"
+import { SocketController, Options } from "../src/socket-controller"
 import { Player } from "../src/player"
 import { Series } from "../src/series"
 import { Card } from "../common/card"
@@ -212,13 +212,17 @@ describe("SocketController", () => {
             let called = false
             const player = socket.board["createPlayer"]()
             const seriesId = 0
+            
             const cards = { [player.id]:threeCardsInOrder}
             const socketMock: SocketIO.Socket = {
-                emit(eventName: String, pId: number, sId: number, cs: { [player: number]: Card[] }) {
+                emit(eventName: String, pId: number, sId: number, cs: { player: number, cards: Card[] }[]) {
                     expect(eventName).to.eq("series-change")
                     expect(pId).to.eq(player.id)
                     expect(sId).to.eq(seriesId)
-                    expect(cards).to.deep.eq(cs)
+
+                    expect(cs.length).to.eq(1)
+                    expect(cs[0].player).to.eq(player.id)
+                    expect(cs[0].cards).to.eq(threeCardsInOrder)
                     called = true
                 },
                 on() {}
@@ -265,7 +269,7 @@ describe("SocketController", () => {
                 return { r: result }
             }
 
-            socket["handleError"](fn)(callback, agr1, agr2)
+            socket["handleError"](fn)(agr1, agr2, callback)
             expect(callbackCalled).to.be.true
             expect(fnCalled).to.be.true
         })
@@ -429,14 +433,52 @@ describe("SocketController", () => {
             socket.join(playerSocket)
 
             func(({ok}:{ok:boolean}) => {
-                expect(ok).to.eq(true)
+                expect(ok).to.be.true
                 called = true
             })
             expect(called).to.be.true
         })
 
-        it("should handle do-draw-pile event", () => {})
-        it("should handle do-end-turn event", () => {})
+        it("should handle do-draw-pile event", () => {
+            let called = false
+            let func: (callback: Function) => void = null as any
+            const playerSocket: SocketIO.Socket = {
+                on(eventName: string, f: (callback: Function) => void) {
+                    if (eventName == "do-draw-pile") func = f
+                },
+                emit() {}
+            } as any
+            
+            socket.board.pile.clear()
+            socket.board.pile.push(two)
+
+            const player = socket.join(playerSocket)
+
+            func(() => {
+                expect(player["cards"]).to.deep.eq([two])
+                called = true
+            })
+            expect(called).to.be.true
+        })
+        it("should handle do-end-turn event", () => {
+            let called = false
+            let func: (callback: Function) => void = null as any
+            const playerSocket: SocketIO.Socket = {
+                on(eventName: string, f: (callback: Function) => void) {
+                    if (eventName == "do-end-turn") func = f
+                },
+                emit() {}
+            } as any
+            
+            socket.join(playerSocket)
+            const player1 = socket.join(socketMock)
+
+            func(() => {
+                expect(socket.board.currentPlayer).to.eq(player1)
+                called = true
+            })
+            expect(called).to.be.true
+        })
 
         it("should not allow joing when false", () => {
             expect(socket["board"].players.length).to.eq(0)
@@ -461,15 +503,37 @@ describe("SocketController", () => {
         })
     })
 
-    describe("startReplace", () => {})
+    it("startReplace", () => {
+        
+    })
 
     describe("doReplace", () => {})
 
-    describe("startAppend", () => {})
+    it("startAppend", () => {
+        let called = false
+        const options: any[] = []
+        const actualOptions: any[] = []
+        const player = socket.board["createPlayer"]()
+        player["getAppendOptions"] = () => options
+
+        socket["getOptions"] = (os: any[]) => {
+            expect(os).to.eq(options)
+            
+            return actualOptions
+        }
+
+        socket["startAppend"](player)(({ options }: { options: Options<any> }) => {
+            expect(options).to.eq(actualOptions)
+            called = true
+        })
+        expect(called).to.be.true
+    })
 
     describe("doAppend", () => {})
 
     describe("notifyTurn", () => {})
+
+    describe("getOptions", () => {})
 
     it("getId", () => {
         const random = Math.random

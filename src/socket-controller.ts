@@ -1,6 +1,14 @@
 import { Board } from "./board"
 import { Card } from "../common/card"
-import { Player, AppendOption, ReplaceOption } from "./player"
+import { Player, Option, AppendOption, ReplaceOption } from "./player"
+
+export type Options<O extends Option> = {
+    cards: {
+        player: number
+        cards: any[]
+    }[]
+    option: O & { player: number }
+}[]
 
 export class SocketController {
     id: string
@@ -59,7 +67,7 @@ export class SocketController {
     }
 
     private notifySeriesChange(player: Player, series: number) {
-        this.socket.emit("series-change", player.id, series, Player.getCardsFromOption({ player, series }))
+        this.socket.emit("series-change", player.id, series, Player.getCardsFromOption({ player, series }).map(cards => Object.assign(cards, { player: cards.player.id })))
     }
 
     private handleError(fn: (...args: any[]) => any) {
@@ -107,14 +115,9 @@ export class SocketController {
     }
 
     private startReplace(player: Player) {
-        return this.handleError(() => {
-            const options = player.getReplaceOptions().map(option => ({
-                cards: Player.getCardsFromOption(option),
-                option: Object.assign(option, { player: option.player.id })
-            }))
-
-            return { options }
-        })
+        return this.handleError(() => ({ 
+            options: this.getOptions(player.getReplaceOptions())
+        }))
     }
 
     private doReplace() {
@@ -123,16 +126,18 @@ export class SocketController {
             option.player.replace(option)
         })
     }
+    
+    private getOptions<O extends Option>(options: O[]): Options<O> {
+        return options.map(option => ({ 
+            cards: Player.getCardsFromOption(option).map(cards => Object.assign(cards, { player: cards.player.id }) as { player: number, cards: Card[] }),
+            option: Object.assign(option, { player: option.player.id })
+        }))
+    }
 
     private startAppend(player: Player) {
-        return this.handleError(() => {
-            const options = player.getAppendOptions().map(option => ({ 
-                cards: Player.getCardsFromOption(option),
-                option: Object.assign(option, { player: option.player.id })
-            }))
-
-            return { options }
-        })
+        return this.handleError(() => ({ 
+            options: this.getOptions(player.getAppendOptions())
+        }))
     }
     private doAppend() {
         return this.handleError((option: AppendOption) => {

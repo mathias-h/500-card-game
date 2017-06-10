@@ -8,7 +8,7 @@ export enum AppendType {
     invalid
 }
 
-interface Option {
+export interface Option {
     series: number
     player: Player
 }
@@ -265,14 +265,8 @@ export class Player {
         }
     }
 
-    static getCardsFromOption(option: Option): { [player: number]: Card[] } {
-        const cards: { [player: number]: Card[] } = {}
-
-        for (const series of option.player.series[option.series].series) {
-            cards[series.player.id] = series.cards
-        }
-
-        return cards
+    static getCardsFromOption(option: Option): { player: Player, cards: Card[] }[] {
+        return option.player.series[option.series].series
     }
 
     compareTo(player: Player): number {
