@@ -62,7 +62,7 @@ export class SocketController {
         this.socket.emit("series-change", player.id, series, Player.getCardsFromOption({ player, series }))
     }
 
-    handleError(fn: (...args: any[]) => any) {
+    private handleError(fn: (...args: any[]) => any) {
         return (...args: any[]) => {
             const callback = args[args.length-1]
 
@@ -141,8 +141,14 @@ export class SocketController {
         })
     }
 
-    private notifyTurn(player: Player) {
-        this.playerSockets.forEach(s => s.emit("turn-changed", player.id))
+    private notifyTurn(player: Player, winningPlayer?: Player) {
+        if (winningPlayer) {
+            this.socket.emit("end-game", winningPlayer.id)
+            this.playerSockets.forEach(s => s.emit("end-game", winningPlayer.id))
+        }
+        else {
+            this.playerSockets.forEach(s => s.emit("turn-changed", player.id))
+        }
     }
 
     private getId(): string {

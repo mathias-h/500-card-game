@@ -4,7 +4,7 @@ import { Player } from "../src/player"
 import { Series } from "../src/series"
 import { Card } from "../common/card"
 
-describe("BoardSocket", () => {
+describe("SocketController", () => {
     let socket: SocketController
     const socketMock: SocketIO.Socket = {
         on() {},
@@ -235,7 +235,40 @@ describe("BoardSocket", () => {
     })
 
     describe("handleError", () => {
-        
+        it("should handle error", () => {
+            let called = false
+            const callback = ({ ok, error}: { ok: boolean, error: string }) => {
+                expect(ok).to.be.false
+                expect(error).to.deep.eq("error")
+                called = true
+            }
+            
+            socket["handleError"](() => {throw new Error("error")})(callback)
+            expect(called).to.be.true
+        })
+        it("should call fn and call callback", () => {
+            let callbackCalled = false
+            let fnCalled = false
+            const agr1 = 1
+            const agr2 = 1
+            const result = 1
+            const callback = ({ ok, r }: { ok: boolean, r: number }) => {
+                expect(ok).to.be.true
+                expect(r).to.eq(result)
+                callbackCalled = true
+            }
+            const fn = (a1: number, a2: number) => {
+                expect(a1).to.eq(agr1)
+                expect(a2).to.eq(agr2)
+                fnCalled = true
+
+                return { r: result }
+            }
+
+            socket["handleError"](fn)(callback, agr1, agr2)
+            expect(callbackCalled).to.be.true
+            expect(fnCalled).to.be.true
+        })
     })
 
     describe("join", () => {
@@ -253,11 +286,8 @@ describe("BoardSocket", () => {
         })
 
         it("should set playerSocket", () => {
-            const playerSocket: SocketIO.Socket = {
-                on() {}
-            } as any
-            socket.join(playerSocket)
-            expect(socket["playerSockets"][0]).to.eq(playerSocket)
+            socket.join(socketMock)
+            expect(socket["playerSockets"][0]).to.eq(socketMock)
         })
 
         it("should emit player-joined event", () => {
