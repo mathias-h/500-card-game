@@ -13,7 +13,7 @@ export class Board {
         private onCardsRemoved: (player: Player, cards: Card[]) => void,
         private onCardSelected: (player: Player, card: Card) => void,
         private onCardDeselected: (player: Player, card: Card) => void,
-        private onTurnChanged: (player: Player) => void,
+        private onTurnChanged: (player: Player, winningPlayer?: Player) => void,
         private onSeriesChanged: (player: Player, seriesId: number) => void,
         onPileChanged: (card: Card) => void
     ) {
@@ -28,10 +28,10 @@ export class Board {
         const cardSelected = (card: Card) => this.onCardSelected(player, card)
         const cardDeselected = (card: Card) => this.onCardDeselected(player, card)
 
-        const player = new Player(
+        const player: Player = new Player(
             this.players.length + 1,
             this,
-            this.nextTurn,
+            hasWon => this.nextTurn(hasWon ? player : undefined),
             this.onSeriesChanged,
             cardAdded,
             cardsRemoved,
@@ -80,12 +80,12 @@ export class Board {
         return scores
     }
 
-    private nextTurn() {
+    private nextTurn(winningPlayer?: Player) {
         const nextIndex = (this.players.findIndex(p => p.id == this.currentPlayer.id) + 1) % this.players.length
 
         this.currentPlayer = this.players[nextIndex]
 
-        this.onTurnChanged(this.currentPlayer)
+        this.onTurnChanged(this.currentPlayer, winningPlayer)
         this.currentPlayer.draw()
     }
 }

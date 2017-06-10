@@ -21,7 +21,19 @@ describe("Board", () => {
 
             expect(player.id).to.eq(1)
             expect(player["board"]).to.eq(board)
-            expect(player["onFinishTurn"]).to.eq(board["nextTurn"])
+        })
+
+        it("should set onTurnChanged", () => {
+            let called = false
+
+            const player = board["createPlayer"]()
+            board["nextTurn"] = (winningPlayer: Player) => {
+                expect(winningPlayer).to.eq(player)
+                called = true
+            }
+
+            player["onFinishTurn"](true)
+            expect(called).to.be.true
         })
 
         it("should set onSeriesChanged", () => {
@@ -231,6 +243,19 @@ describe("Board", () => {
 
             board["onTurnChanged"] = onTurnChanged
             board["nextTurn"]()
+            expect(called).to.be.true
+        })
+        it("should pass winningPlayer to onTurnChanged", () => {
+            let called = false
+
+            const player = board.join()
+            const onTurnChanged = (_: Player, winningPlayer: Player) => {
+                expect(winningPlayer).to.eq(player)
+                called = true
+            }
+
+            board["onTurnChanged"] = onTurnChanged
+            board["nextTurn"](player)
             expect(called).to.be.true
         })
     })
